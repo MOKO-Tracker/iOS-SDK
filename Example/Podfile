@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '8.0'
+
+target 'MKTrackerSDK_Example' do
+  pod 'MKTrackerSDK', :path => '../'
+
+  target 'MKTrackerSDK_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
