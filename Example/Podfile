@@ -1,9 +1,31 @@
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 9.0
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
+      end
+    end
+  end
+end
 use_frameworks!
 
-platform :ios, '8.0'
+source 'https://github.com/CocoaPods/Specs.git'
+
+platform :ios, '9.0'
 
 target 'MKTrackerSDK_Example' do
   pod 'MKTrackerSDK', :path => '../'
+
+  pod 'MLInputDodger'
+  pod 'iOSDFULibrary'
+  pod 'FMDB'
+  pod 'CircleProgressBar'
+  pod 'Masonry'
+  pod 'MBProgressHUD'
+  pod 'MJRefresh'
+  pod 'Toast'
+  pod 'YYKit'
 
   target 'MKTrackerSDK_Tests' do
     inherit! :search_paths

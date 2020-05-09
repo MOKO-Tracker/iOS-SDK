@@ -1,0 +1,6 @@
+framework module MKTrackerSDK {
+  umbrella header "MKTrackerSDK-umbrella.h"
+
+  export *
+  module * { export * }
+}

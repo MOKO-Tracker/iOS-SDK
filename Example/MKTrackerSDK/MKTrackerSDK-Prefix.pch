@@ -4,13 +4,20 @@
 //  The contents of this file are implicitly included at the beginning of every source file.
 //
 
-#import <Availability.h>
+/***第三方头文件****/
+#import <Masonry/Masonry.h>
+#import "MBProgressHUD.h"
+#import "UIView+Toast.h"
+#import "MKHudManager.h"
+#import "MLInputDodger.h"
+#import "CircleProgressBar.h"
+#import "YYKit.h"
 
-#ifndef __IPHONE_5_0
-#warning "This project uses features only available in iOS SDK 5.0 and later."
-#endif
 
-#ifdef __OBJC__
-    @import UIKit;
-    @import Foundation;
-#endif
+#import "MKBaseModule.h"
+#import "MKAttributedString.h"
+#import "MKBaseTableView.h"
+
+#import "MKContactTrackerSDK.h"
+
+#import "MKNormalDefines.h"

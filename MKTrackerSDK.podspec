@@ -28,15 +28,15 @@ TODO: Add long description of the pod here.
   s.source           = { :git => 'https://github.com/aadyx2007@163.com/MKTrackerSDK.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
 
-  s.source_files = 'MKTrackerSDK/Classes/**/*'
+  s.source_files = 'MKTrackerSDK/Classes/MKContactTrackerSDK.h'
+  s.subspec 'MKBLEBaseSDK' do |ss|
+    ss.source_files = 'MKTrackerSDK/Classes/MKBLEBaseSDK/**'
+  end
+  s.subspec 'MKTrackerSDK' do |ss|
+    ss.source_files = 'MKTrackerSDK/Classes/MKTrackerSDK/**'
+    ss.dependency 'MKTrackerSDK/MKBLEBaseSDK'
+  end
   
-  # s.resource_bundles = {
-  #   'MKTrackerSDK' => ['MKTrackerSDK/Assets/*.png']
-  # }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
 end
