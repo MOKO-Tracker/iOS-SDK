@@ -8,11 +8,11 @@ PODS:
   - Masonry (1.1.0)
   - MBProgressHUD (1.2.0)
   - MJRefresh (3.4.1)
-  - MKTrackerSDK (0.1.0):
-    - MKTrackerSDK/MKBLEBaseSDK (= 0.1.0)
-    - MKTrackerSDK/MKTrackerSDK (= 0.1.0)
-  - MKTrackerSDK/MKBLEBaseSDK (0.1.0)
-  - MKTrackerSDK/MKTrackerSDK (0.1.0):
+  - MKTrackerSDK (0.1.1):
+    - MKTrackerSDK/MKBLEBaseSDK (= 0.1.1)
+    - MKTrackerSDK/MKTrackerSDK (= 0.1.1)
+  - MKTrackerSDK/MKBLEBaseSDK (0.1.1)
+  - MKTrackerSDK/MKTrackerSDK (0.1.1):
     - MKTrackerSDK/MKBLEBaseSDK
   - MLInputDodger (1.5.2)
   - Toast (4.0.0)
@@ -57,7 +57,7 @@ SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MJRefresh: 3153c59a363159092c08b2177ec3a7d09f90bfaf
-  MKTrackerSDK: 98e8d4a40e0b52fcfaa9d5033b08fb46b72bbe03
+  MKTrackerSDK: 4c3429c3142c94660136a7b3597fc2ee7b92b606
   MLInputDodger: 79a0e420a80d0d3bba122bf2639603cc76609ba8
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   YYKit: 7cda43304a8dc3696c449041e2cb3107b4e236e7

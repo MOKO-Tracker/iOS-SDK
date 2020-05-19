@@ -1,9 +1,9 @@
 {
   "name": "MKTrackerSDK",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "summary": "A short description of MKTrackerSDK.",
   "description": "TODO: Add long description of the pod here.",
-  "homepage": "https://github.com/aadyx2007@163.com/MKTrackerSDK",
+  "homepage": "https://github.com/MOKO-Tracker/iOS-SDK",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -12,8 +12,8 @@
     "aadyx2007@163.com": "aadyx2007@163.com"
   },
   "source": {
-    "git": "https://github.com/aadyx2007@163.com/MKTrackerSDK.git",
-    "tag": "0.1.0"
+    "git": "https://github.com/MOKO-Tracker/iOS-SDK.git",
+    "tag": "0.1.1"
   },
   "platforms": {
     "ios": "9.0"
