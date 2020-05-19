@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSDictionary *)parseDateString:(NSString *)date;
 + (NSDictionary *)parseScannerTrackedData:(NSString *)content;
 
+
+
 @end
 
 NS_ASSUME_NONNULL_END
