@@ -460,10 +460,10 @@ static dispatch_once_t onceToken;
     }else if ([distance doubleValue] > 1.f){
         dataModel.proximity = @"Far";
     }
-    NSString *connectString = [dataString substringWithRange:NSMakeRange(12, 1)];
-    NSString *trackString = [dataString substringWithRange:NSMakeRange(13, 1)];
-    dataModel.connectable = [connectString isEqualToString:@"1"];
-    dataModel.track = [trackString isEqualToString:@"1"];
+    
+    NSString *state = [MKTrackerAdopter getBinaryByhex:[dataString substringWithRange:NSMakeRange(12, 2)]];
+    dataModel.connectable = [[state substringWithRange:NSMakeRange(7, 1)] isEqualToString:@"1"];
+    dataModel.track = [[state substringWithRange:NSMakeRange(6, 1)] isEqualToString:@"1"];
     dataModel.batteryVoltage = [MKBLEBaseSDKAdopter getDecimalWithHex:dataString range:NSMakeRange(14, 4)];
     NSString *tempMac = [[dataString substringWithRange:NSMakeRange(18, 12)] uppercaseString];
     dataModel.macAddress = [NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@",
