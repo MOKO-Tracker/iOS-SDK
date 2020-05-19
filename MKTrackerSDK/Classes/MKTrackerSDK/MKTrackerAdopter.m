@@ -31,6 +31,34 @@
     return (numberOfMatches > 0);
 }
 
++ (NSString *)getBinaryByhex:(NSString *)hex{
+    if (!hex || ![hex isKindOfClass:NSString.class] || hex.length != 2 || ![MKBLEBaseSDKAdopter checkHexCharacter:hex]) {
+        return @"";
+    }
+    NSDictionary *hexDic = @{
+                             @"0":@"0000",@"1":@"0001",@"2":@"0010",
+                             @"3":@"0011",@"4":@"0100",@"5":@"0101",
+                             @"6":@"0110",@"7":@"0111",@"8":@"1000",
+                             @"9":@"1001",@"A":@"1010",@"a":@"1010",
+                             @"B":@"1011",@"b":@"1011",@"C":@"1100",
+                             @"c":@"1100",@"D":@"1101",@"d":@"1101",
+                             @"E":@"1110",@"e":@"1110",@"F":@"1111",
+                             @"f":@"1111",
+                             };
+    NSString *binaryString = @"";
+    for (int i=0; i<[hex length]; i++) {
+        NSRange rage;
+        rage.length = 1;
+        rage.location = i;
+        NSString *key = [hex substringWithRange:rage];
+        binaryString = [NSString stringWithFormat:@"%@%@",binaryString,
+                        [NSString stringWithFormat:@"%@",[hexDic objectForKey:key]]];
+        
+    }
+    
+    return binaryString;
+}
+
 + (NSDictionary *)parseDateString:(NSString *)date {
     NSString *year = [NSString stringWithFormat:@"%ld",(long)([MKBLEBaseSDKAdopter getDecimalWithHex:date range:NSMakeRange(0, 2)] + 2000)];
     NSString *month = [MKBLEBaseSDKAdopter getDecimalStringWithHex:date range:NSMakeRange(2, 2)];

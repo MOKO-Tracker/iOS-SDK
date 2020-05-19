@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (BOOL)asciiString:(NSString *)content;
 + (BOOL)isUUIDString:(NSString *)uuid;
++ (NSString *)getBinaryByhex:(NSString *)hex;
 + (NSDictionary *)parseDateString:(NSString *)date;
 + (NSDictionary *)parseScannerTrackedData:(NSString *)content;
 
