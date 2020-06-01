@@ -291,6 +291,12 @@ typedef NS_ENUM(NSInteger, mk_trackingNotification) {
 + (void)clearAllDatasWithSucBlock:(void (^)(void))sucBlock
                       failedBlock:(void (^)(NSError *error))failedBlock;
 
+/// Send vibration commands to the device.
+/// @param sucBlock Success callback
+/// @param failedBlock Failure callback
++ (void)sendVibrationCommandsToDeviceWithSucBlock:(void (^)(void))sucBlock
+                                      failedBlock:(void (^)(NSError *error))failedBlock;
+
 @end
 
 NS_ASSUME_NONNULL_END

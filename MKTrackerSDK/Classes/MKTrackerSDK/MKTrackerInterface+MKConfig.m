@@ -575,6 +575,15 @@
                      failedBlock:failedBlock];
 }
 
++ (void)sendVibrationCommandsToDeviceWithSucBlock:(void (^)(void))sucBlock
+                                      failedBlock:(void (^)(NSError *error))failedBlock {
+    [self addTaskWithOperationID:mk_taskSendVibrationCommandsOperation
+                  characteristic:centralManager.peripheral.custom
+                     commandData:@"eaf10000"
+                        sucBlock:sucBlock
+                     failedBlock:failedBlock];
+}
+
 #pragma mark - task method
 + (void)addTaskWithOperationID:(mk_taskOperationID)operationID
                 characteristic:(CBCharacteristic *)characteristic

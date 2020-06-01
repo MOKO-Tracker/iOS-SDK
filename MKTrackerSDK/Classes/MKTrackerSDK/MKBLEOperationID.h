@@ -67,4 +67,5 @@ typedef NS_ENUM(NSInteger, mk_taskOperationID) {
     mk_taskConfigFactoryDataResetOperation,
     mk_taskConfigPasswordOperation,               //密码
     mk_taskClearAllDatasOperation,
+    mk_taskSendVibrationCommandsOperation,
 };

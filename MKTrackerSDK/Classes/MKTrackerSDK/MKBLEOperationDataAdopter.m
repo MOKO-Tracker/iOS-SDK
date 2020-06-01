@@ -443,6 +443,12 @@ NSString *const mk_communicationDataNum = @"mk_communicationDataNum";
                        @"result":@(YES)
                        };
         operationID = mk_taskConfigMinorFilterStatusOperation;
+    }else if ([function isEqualToString:@"f1"] && content.length == 8) {
+        //震动
+        returnDic = @{
+                       @"result":@(YES)
+                       };
+        operationID = mk_taskSendVibrationCommandsOperation;
     }
     return [self dataParserGetDataSuccess:returnDic operationID:operationID];
 }
