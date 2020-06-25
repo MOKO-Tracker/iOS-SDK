@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00076EA224A48E5100EE9C37 /* MKScannWindowConfigView.m in Sources */ = {isa = PBXBuildFile; fileRef = 00076EA024A48E5000EE9C37 /* MKScannWindowConfigView.m */; };
 		005A0BDE2466434200583A20 /* MKUpdateController.m in Sources */ = {isa = PBXBuildFile; fileRef = 005A0A5E2466434000583A20 /* MKUpdateController.m */; };
 		005A0BDF2466434200583A20 /* MKFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 005A0A612466434100583A20 /* MKFileManager.m */; };
 		005A0BE02466434200583A20 /* MKDFUModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 005A0A652466434100583A20 /* MKDFUModel.m */; };
@@ -279,6 +280,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00076EA024A48E5000EE9C37 /* MKScannWindowConfigView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKScannWindowConfigView.m; sourceTree = "<group>"; };
+		00076EA124A48E5100EE9C37 /* MKScannWindowConfigView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKScannWindowConfigView.h; sourceTree = "<group>"; };
 		005A0A5D2466434000583A20 /* MKUpdateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKUpdateController.h; sourceTree = "<group>"; };
 		005A0A5E2466434000583A20 /* MKUpdateController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MKUpdateController.m; sourceTree = "<group>"; };
 		005A0A602466434100583A20 /* MKFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MKFileManager.h; sourceTree = "<group>"; };
@@ -867,6 +870,8 @@
 		005A0A8E2466434100583A20 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				00076EA124A48E5100EE9C37 /* MKScannWindowConfigView.h */,
+				00076EA024A48E5000EE9C37 /* MKScannWindowConfigView.m */,
 				005A0A8F2466434100583A20 /* MKTriggerSensitivityView.h */,
 				005A0A902466434100583A20 /* slider */,
 				005A0A992466434100583A20 /* MKSwitchStatusCell.m */,
@@ -2042,6 +2047,7 @@
 				005A0BE72466434200583A20 /* MKAdvertiserNormalCell.m in Sources */,
 				005A0C212466434200583A20 /* UIButton+MKCategoryModule.m in Sources */,
 				005A0BE82466434200583A20 /* MKAdvTriggerCell.m in Sources */,
+				00076EA224A48E5100EE9C37 /* MKScannWindowConfigView.m in Sources */,
 				005A0C122466434200583A20 /* MKProgressView.m in Sources */,
 				005A0BE32466434200583A20 /* MKAdvertiserDataModel.m in Sources */,
 				005A0BFF2466434200583A20 /* MKScannerPageController.m in Sources */,

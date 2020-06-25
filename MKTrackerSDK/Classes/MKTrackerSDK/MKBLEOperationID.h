@@ -37,6 +37,7 @@ typedef NS_ENUM(NSInteger, mk_taskOperationID) {
     mk_taskReadConnectableStatusOperation,
     mk_taskReadButtonPowerStatusOperation,
     mk_taskReadMovementSensitivityOperation,
+    mk_taskReadScanWindowDataOperation,
     
 #pragma mark - Config
     mk_taskConfigDateOperation,             //设置时间
@@ -64,6 +65,7 @@ typedef NS_ENUM(NSInteger, mk_taskOperationID) {
     mk_taskConfigButtonPowerStatusOperation,
     mk_taskConfigPowerOffOperation,
     mk_taskConfigMovementSensitivityOperation,//
+    mk_taskConfigScannWindowOperation,
     mk_taskConfigFactoryDataResetOperation,
     mk_taskConfigPasswordOperation,               //密码
     mk_taskClearAllDatasOperation,

@@ -528,6 +528,27 @@
                      failedBlock:failedBlock];
 }
 
++ (void)configScannWindow:(mk_scannWindowType)type
+                 sucBlock:(void (^)(void))sucBlock
+              failedBlock:(void (^)(NSError *error))failedBlock {
+    NSString *windowType = @"00";
+    if (type == mk_scannWindowTypeOpen) {
+        windowType = @"01";
+    }else if (type == mk_scannWindowTypeHalfOpen) {
+        windowType = @"02";
+    }else if (type == mk_scannWindowTypeQuarterOpen) {
+        windowType = @"03";
+    }else if (type == mk_scannWindowTypeOneEighthOpen) {
+        windowType = @"04";
+    }
+    NSString *commandString = [@"ea700001" stringByAppendingString:windowType];
+    [self addTaskWithOperationID:mk_taskConfigScannWindowOperation
+                  characteristic:centralManager.peripheral.custom
+                     commandData:commandString
+                        sucBlock:sucBlock
+                     failedBlock:failedBlock];
+}
+
 + (void)factoryDataResetWithPassword:(NSString *)password
                             sucBlock:(void (^)(void))sucBlock
                          failedBlock:(void (^)(NSError *error))failedBlock {

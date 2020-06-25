@@ -218,6 +218,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)readMovementSensitivityWithSucBlock:(nonnull void (^)(id returnData))sucBlock
                                 failedBlock:(nonnull void (^)(NSError *error))failedBlock;
 
+/// The scan duration of every 1000ms.If you set the duration to 0ms,the Beacon will stop scanning,
+/// @param sucBlock Success callback
+/// @param failedBlock Failure callback
++ (void)readScanWindowDataWithSucBlock:(nonnull void (^)(id returnData))sucBlock
+                           failedBlock:(nonnull void (^)(NSError *error))failedBlock;
+
 @end
 
 NS_ASSUME_NONNULL_END

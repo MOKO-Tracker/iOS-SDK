@@ -310,4 +310,14 @@
                          failureBlock:failedBlock];
 }
 
++ (void)readScanWindowDataWithSucBlock:(nonnull void (^)(id returnData))sucBlock
+                           failedBlock:(nonnull void (^)(NSError *error))failedBlock {
+    [centralManager addTaskWithTaskID:mk_taskReadScanWindowDataOperation
+                       characteristic:centralManager.peripheral.custom
+                             resetNum:NO
+                          commandData:@"ea600000"
+                         successBlock:sucBlock
+                         failureBlock:failedBlock];
+}
+
 @end

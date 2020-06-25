@@ -45,6 +45,14 @@ typedef NS_ENUM(NSInteger, mk_trackingNotification) {
     mk_ledMotorTrackingNotification,
 };
 
+typedef NS_ENUM(NSInteger, mk_scannWindowType) {
+    mk_scannWindowTypeClose,            //close.
+    mk_scannWindowTypeOpen,             //open.
+    mk_scannWindowTypeHalfOpen,         //Open in half time.
+    mk_scannWindowTypeQuarterOpen,      //Open a quarter of the time.
+    mk_scannWindowTypeOneEighthOpen,    //Open in one eighth time.
+};
+
 @interface MKTrackerInterface (MKConfig)
 
 /// Configure device time
@@ -193,7 +201,7 @@ typedef NS_ENUM(NSInteger, mk_trackingNotification) {
 
 /// Set the current proximity UUID filtering conditions
 /// @param isOn Whether to enable proximity UUID filtering
-/// @param uuid The proximity UUID to be filtered. If isOn = NO, the item can be omitted. 
+/// @param uuid The proximity UUID to be filtered. If isOn = NO, the item can be omitted.
 /// @param sucBlock Success callback
 /// @param failedBlock Failure callback
 + (void)configProximityUUIDFilterStatus:(BOOL)isOn
@@ -268,6 +276,14 @@ typedef NS_ENUM(NSInteger, mk_trackingNotification) {
 + (void)configMovementSensitivity:(NSInteger)sensitivity
                          sucBlock:(void (^)(void))sucBlock
                       failedBlock:(void (^)(NSError *error))failedBlock;
+
+/// The scan duration of every 1000ms
+/// @param type type
+/// @param sucBlock Success callback
+/// @param failedBlock Failure callback
++ (void)configScannWindow:(mk_scannWindowType)type
+                 sucBlock:(void (^)(void))sucBlock
+              failedBlock:(void (^)(NSError *error))failedBlock;
 
 /// Resetting to factory state (RESET).NOTE:When resetting the device, the connection password will not be restored which shall remain set to its current value.
 /// @param password 8-character ascii code characters

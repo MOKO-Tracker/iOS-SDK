@@ -15,6 +15,7 @@
 
 #import "MKUpdateController.h"
 #import "MKTriggerSensitivityView.h"
+#import "MKScannWindowConfigView.h"
 
 @interface MKSettingController ()<UITableViewDelegate, UITableViewDataSource, MKSwitchStatusCellDelegate>
 
@@ -34,6 +35,9 @@
 
 @property (nonatomic, strong)UITextField *confirmTextField;
 
+/// 对于04类型的设备，不支持ADV Trigger功能
+@property (nonatomic, assign)BOOL supportAdvTrigger;
+
 @end
 
 @implementation MKSettingController
@@ -48,6 +52,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    NSString *deviceType = [[NSUserDefaults standardUserDefaults] objectForKey:@"MKTrackerDeviceType"];
+    self.supportAdvTrigger = [deviceType isEqualToString:@"05"];
     [self loadSubViews];
     [self loadTableDatas];
     [self startReadStatus];
@@ -84,11 +90,13 @@
             self.hidesBottomBarWhenPushed = NO;
             return;
         }
-        if (indexPath.row == 3) {
+        if (self.supportAdvTrigger && indexPath.row == 3) {
             //灵敏度
             [self triggerSensitivityMethod];
             return;
         }
+        //设置Scan Window
+        [self scanWindowMethod];
     }
 }
 
@@ -118,22 +126,22 @@
 
 #pragma mark - MKSwitchStatusCellDelegate
 - (void)needChangedCellSwitchStatus:(BOOL)isOn row:(NSInteger)row {
+//    if (row == 0) {
+//        //设备扫描状态
+//        [self setScanStatusEnable:isOn];
+//        return;
+//    }
     if (row == 0) {
-        //设备扫描状态
-        [self setScanStatusEnable:isOn];
-        return;
-    }
-    if (row == 1) {
         //可连接状态
         [self setConnectEnable:isOn];
         return;
     }
-    if (row == 2) {
+    if (row == 1) {
         //按键开关
         [self setButtonPowerStatusEnable:isOn];
         return;
     }
-    if (row == 3) {
+    if (row == 2) {
         //关机
         [self powerOff];
         return;
@@ -144,14 +152,14 @@
 - (void)startReadStatus {
     [[MKHudManager share] showHUDWithTitle:@"Reading..." inView:self.view isPenetration:NO];
     dispatch_async(self.configQueue, ^{
-        NSDictionary *scanStatusDic = [self readScanStatus];
-        if (![scanStatusDic[@"success"] boolValue]) {
-            moko_dispatch_main_safe(^{
-                [[MKHudManager share] hide];
-                [self.view showCentralToast:@"Read scan status error!"];
-            });
-            return ;
-        }
+//        NSDictionary *scanStatusDic = [self readScanStatus];
+//        if (![scanStatusDic[@"success"] boolValue]) {
+//            moko_dispatch_main_safe(^{
+//                [[MKHudManager share] hide];
+//                [self.view showCentralToast:@"Read scan status error!"];
+//            });
+//            return ;
+//        }
         NSDictionary *connectDic = [self readConnectableStatus];
         if (![connectDic[@"success"] boolValue]) {
             moko_dispatch_main_safe(^{
@@ -168,11 +176,11 @@
             });
             return ;
         }
-        MKSwitchStatusCellModel *scannerModel = self.section1List[0];
-        scannerModel.isOn = [scanStatusDic[@"isOn"] boolValue];
-        MKSwitchStatusCellModel *connectModel = self.section1List[1];
+//        MKSwitchStatusCellModel *scannerModel = self.section1List[0];
+//        scannerModel.isOn = [scanStatusDic[@"isOn"] boolValue];
+        MKSwitchStatusCellModel *connectModel = self.section1List[0];
         connectModel.isOn = [connectDic[@"isOn"] boolValue];
-        MKSwitchStatusCellModel *buttonPowerModel = self.section1List[2];
+        MKSwitchStatusCellModel *buttonPowerModel = self.section1List[1];
         buttonPowerModel.isOn = [buttonPower[@"isOn"] boolValue];
         moko_dispatch_main_safe(^{
             [[MKHudManager share] hide];
@@ -237,7 +245,46 @@
     return resultDic;
 }
 
+- (NSDictionary *)readScanWindow {
+    __block NSMutableDictionary *resultDic = [NSMutableDictionary dictionary];
+    [MKTrackerInterface readScanWindowDataWithSucBlock:^(id  _Nonnull returnData) {
+        [resultDic setValue:@(YES) forKey:@"success"];
+        [resultDic setValue:returnData[@"result"][@"value"] forKey:@"type"];
+        dispatch_semaphore_signal(self.semaphore);
+    } failedBlock:^(NSError * _Nonnull error) {
+        [resultDic setValue:@(NO) forKey:@"success"];
+        dispatch_semaphore_signal(self.semaphore);
+    }];
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    return resultDic;
+}
+
+- (BOOL)configScanStatus:(BOOL)isOn {
+    __block BOOL success = NO;
+    [MKTrackerInterface configScanStatus:isOn sucBlock:^{
+        success = YES;
+        dispatch_semaphore_signal(self.semaphore);
+    } failedBlock:^(NSError * _Nonnull error) {
+        dispatch_semaphore_signal(self.semaphore);
+    }];
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    return success;
+}
+
+- (BOOL)configScanWindowType:(mk_scannWindowType)type {
+    __block BOOL success = NO;
+    [MKTrackerInterface configScannWindow:type sucBlock:^{
+        success = YES;
+        dispatch_semaphore_signal(self.semaphore);
+    } failedBlock:^(NSError * _Nonnull error) {
+        dispatch_semaphore_signal(self.semaphore);
+    }];
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    return success;
+}
+
 #pragma mark - 设置扫描状态
+/*
 - (void)setScanStatusEnable:(BOOL)isOn{
     NSString *msg = (isOn ? @"If you turn on Beacon Scanner function, the Beacon will start scanning." : @"If you turn off Beacon Scanner function, the Beacon will stop scanning.");
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Warning!"
@@ -266,6 +313,9 @@
     [MKTrackerInterface configScanStatus:isOn sucBlock:^{
         [[MKHudManager share] hide];
         [weakSelf.view showCentralToast:@"Success!"];
+        MKSwitchStatusCellModel *model = weakSelf.section1List[0];
+        model.isOn = isOn;
+        [weakSelf.tableView reloadRow:0 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
     } failedBlock:^(NSError * _Nonnull error) {
         [[MKHudManager share] hide];
         [weakSelf.view showCentralToast:error.userInfo[@"errorInfo"]];
@@ -274,6 +324,7 @@
         [weakSelf.tableView reloadRow:0 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
     }];
 }
+ */
 
 #pragma mark - 设置可连接状态
 - (void)setConnectEnable:(BOOL)connect{
@@ -283,9 +334,9 @@
                                                                       preferredStyle:UIAlertControllerStyleAlert];
     WS(weakSelf);
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-        MKSwitchStatusCellModel *model = weakSelf.section1List[1];
+        MKSwitchStatusCellModel *model = weakSelf.section1List[0];
         model.isOn = !connect;
-        [weakSelf.tableView reloadRow:1 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
+        [weakSelf.tableView reloadRow:0 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
     }];
     [alertController addAction:cancelAction];
     UIAlertAction *moreAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -307,9 +358,9 @@
     } failedBlock:^(NSError * _Nonnull error) {
         [[MKHudManager share] hide];
         [weakSelf.view showCentralToast:error.userInfo[@"errorInfo"]];
-        MKSwitchStatusCellModel *model = weakSelf.section1List[1];
+        MKSwitchStatusCellModel *model = weakSelf.section1List[0];
         model.isOn = !connect;
-        [weakSelf.tableView reloadRow:1 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
+        [weakSelf.tableView reloadRow:0 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
     }];
 }
 
@@ -321,13 +372,13 @@
                                                                       preferredStyle:UIAlertControllerStyleAlert];
     WS(weakSelf);
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-        MKSwitchStatusCellModel *model = weakSelf.section1List[2];
+        MKSwitchStatusCellModel *model = weakSelf.section1List[1];
         model.isOn = !isOn;
-        [weakSelf.tableView reloadRow:2 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
+        [weakSelf.tableView reloadRow:1 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
     }];
     [alertController addAction:cancelAction];
     UIAlertAction *moreAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [weakSelf setScanStatusToDevice:isOn];
+        [weakSelf setButtonPowerStatusToDevice:isOn];
     }];
     [alertController addAction:moreAction];
     
@@ -345,9 +396,9 @@
     } failedBlock:^(NSError * _Nonnull error) {
         [[MKHudManager share] hide];
         [weakSelf.view showCentralToast:error.userInfo[@"errorInfo"]];
-        MKSwitchStatusCellModel *model = weakSelf.section1List[2];
+        MKSwitchStatusCellModel *model = weakSelf.section1List[1];
         model.isOn = !isOn;
-        [weakSelf.tableView reloadRow:2 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
+        [weakSelf.tableView reloadRow:1 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
     }];
 }
 
@@ -359,9 +410,9 @@
                                                                       preferredStyle:UIAlertControllerStyleAlert];
     WS(weakSelf);
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-        MKSwitchStatusCellModel *model = weakSelf.section1List[3];
-        model.isOn = YES;
-        [weakSelf.tableView reloadRow:3 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
+        MKSwitchStatusCellModel *model = weakSelf.section1List[2];
+        model.isOn = NO;
+        [weakSelf.tableView reloadRow:2 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
     }];
     [alertController addAction:cancelAction];
     UIAlertAction *moreAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -382,9 +433,9 @@
     } failedBlock:^(NSError * _Nonnull error) {
         [[MKHudManager share] hide];
         [weakSelf.view showCentralToast:error.userInfo[@"errorInfo"]];
-        MKSwitchStatusCellModel *model = weakSelf.section1List[3];
+        MKSwitchStatusCellModel *model = weakSelf.section1List[2];
         model.isOn = YES;
-        [weakSelf.tableView reloadRow:3 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
+        [weakSelf.tableView reloadRow:2 inSection:1 withRowAnimation:UITableViewRowAnimationNone];
     }];
 }
 
@@ -535,6 +586,89 @@
     }];
 }
 
+#pragma mark - 设置scan window
+- (void)scanWindowMethod {
+    [[MKHudManager share] showHUDWithTitle:@"Reading..."
+                                    inView:self.view
+                             isPenetration:NO];
+    dispatch_async(self.configQueue, ^{
+        NSDictionary *scanStatusDic = [self readScanStatus];
+        if (![scanStatusDic[@"success"] boolValue]) {
+            moko_dispatch_main_safe(^{
+                [[MKHudManager share] hide];
+                [self.view showCentralToast:@"Read scan status error!"];
+            });
+            return ;
+        }
+        BOOL isOn = [scanStatusDic[@"isOn"] boolValue];
+        if (!isOn) {
+            //关闭状态
+            moko_dispatch_main_safe(^{
+                [[MKHudManager share] hide];
+                [self showViewWithScanWindowValue:mk_scannWindowTypeClose];
+            });
+            return;
+        }
+        NSDictionary *scanWindowDic = [self readScanWindow];
+        if (![scanWindowDic[@"success"] boolValue]) {
+            moko_dispatch_main_safe(^{
+                [[MKHudManager share] hide];
+                [self.view showCentralToast:@"Read scan window error!"];
+            });
+            return ;
+        }
+        moko_dispatch_main_safe(^{
+            [[MKHudManager share] hide];
+            [self showViewWithScanWindowValue:[scanWindowDic[@"type"] integerValue]];
+        });
+    });
+    
+}
+
+- (void)showViewWithScanWindowValue:(mk_scannWindowType)value {
+    WS(weakSelf);
+    MKScannWindowConfigView *view = [[MKScannWindowConfigView alloc] init];
+    [view showViewWithValue:value completeBlock:^(mk_scannWindowType resultType) {
+        __strong typeof(self) sself = weakSelf;
+        [sself configScanWindowStatus:resultType];
+    }];
+}
+
+- (void)configScanWindowStatus:(mk_scannWindowType)scanType {
+    [[MKHudManager share] showHUDWithTitle:@"Setting..."
+                                    inView:self.view
+                             isPenetration:NO];
+    dispatch_async(self.configQueue, ^{
+        BOOL isOn = (scanType != mk_scannWindowTypeClose);
+        if (![self configScanStatus:isOn]) {
+            moko_dispatch_main_safe(^{
+                [[MKHudManager share] hide];
+                [self.view showCentralToast:@"Config scan stauts error"];
+            });
+            return ;
+        }
+        if (!isOn) {
+            //关闭状态不需要再设置scan window
+            moko_dispatch_main_safe(^{
+                [[MKHudManager share] hide];
+                [self.view showCentralToast:@"Success"];
+            });
+            return;
+        }
+        if (![self configScanWindowType:scanType]) {
+            moko_dispatch_main_safe(^{
+                [[MKHudManager share] hide];
+                [self.view showCentralToast:@"Config scan window type error"];
+            });
+            return ;
+        }
+        moko_dispatch_main_safe(^{
+            [[MKHudManager share] hide];
+            [self.view showCentralToast:@"Success"];
+        });
+    });
+}
+
 #pragma mark -
 - (void)loadTableDatas {
     MKContactTrackerTextCellModel *passwrodModel = [[MKContactTrackerTextCellModel alloc] init];
@@ -552,29 +686,36 @@
     dufModel.showRightIcon = YES;
     [self.section0List addObject:dufModel];
     
-    MKContactTrackerTextCellModel *triggerModel = [[MKContactTrackerTextCellModel alloc] init];
-    triggerModel.leftMsg = @"Trigger Sensitivity";
-    triggerModel.showRightIcon = YES;
-    [self.section0List addObject:triggerModel];
+    if (self.supportAdvTrigger) {
+        MKContactTrackerTextCellModel *triggerModel = [[MKContactTrackerTextCellModel alloc] init];
+        triggerModel.leftMsg = @"Trigger Sensitivity";
+        triggerModel.showRightIcon = YES;
+        [self.section0List addObject:triggerModel];
+    }
     
-    MKSwitchStatusCellModel *scannerModel = [[MKSwitchStatusCellModel alloc] init];
-    scannerModel.msg = @"Beacon Scanner";
-    scannerModel.index = 0;
-    [self.section1List addObject:scannerModel];
+    MKContactTrackerTextCellModel *scanWindowModel = [[MKContactTrackerTextCellModel alloc] init];
+    scanWindowModel.leftMsg = @"Scan Window";
+    scanWindowModel.showRightIcon = YES;
+    [self.section0List addObject:scanWindowModel];
+    
+//    MKSwitchStatusCellModel *scannerModel = [[MKSwitchStatusCellModel alloc] init];
+//    scannerModel.msg = @"Beacon Scanner";
+//    scannerModel.index = 0;
+//    [self.section1List addObject:scannerModel];
     
     MKSwitchStatusCellModel *connectModel = [[MKSwitchStatusCellModel alloc] init];
     connectModel.msg = @"Connectable";
-    connectModel.index = 1;
+    connectModel.index = 0;
     [self.section1List addObject:connectModel];
     
     MKSwitchStatusCellModel *buttonPowerModel = [[MKSwitchStatusCellModel alloc] init];
     buttonPowerModel.msg = @"Button Power";
-    buttonPowerModel.index = 2;
+    buttonPowerModel.index = 1;
     [self.section1List addObject:buttonPowerModel];
     
     MKSwitchStatusCellModel *powerOffModel = [[MKSwitchStatusCellModel alloc] init];
     powerOffModel.msg = @"Power Off";
-    powerOffModel.index = 3;
+    powerOffModel.index = 2;
     [self.section1List addObject:powerOffModel];
 }
 

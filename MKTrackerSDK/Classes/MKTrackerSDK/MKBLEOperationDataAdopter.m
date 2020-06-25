@@ -146,7 +146,7 @@ NSString *const mk_communicationDataNum = @"mk_communicationDataNum";
         //自定义协议部分
         return [self parseFF10Data:readData];
     }
-    return nil;
+    return @{};
 }
 
 + (NSDictionary *)parseWriteDataWithCharacteristic:(CBCharacteristic *)characteristic {
@@ -443,6 +443,19 @@ NSString *const mk_communicationDataNum = @"mk_communicationDataNum";
                        @"result":@(YES)
                        };
         operationID = mk_taskConfigMinorFilterStatusOperation;
+    }else if ([function isEqualToString:@"60"] && content.length == 10) {
+        //读取scan window
+        NSString *value = [MKBLEBaseSDKAdopter getDecimalStringWithHex:content range:NSMakeRange(8, 2)];
+        returnDic = @{
+                       @"value":value,
+                       };
+        operationID = mk_taskReadScanWindowDataOperation;
+    }else if ([function isEqualToString:@"70"] && content.length == 8) {
+        //配置scan window
+        returnDic = @{
+                       @"result":@(YES)
+                       };
+        operationID = mk_taskConfigScannWindowOperation;
     }else if ([function isEqualToString:@"f1"] && content.length == 8) {
         //震动
         returnDic = @{
@@ -464,7 +477,7 @@ NSString *const mk_communicationDataNum = @"mk_communicationDataNum";
 
 + (NSDictionary *)dataParserGetDataSuccess:(NSDictionary *)returnData operationID:(mk_taskOperationID)operationID{
     if (!returnData) {
-        return nil;
+        return @{};
     }
     return @{@"returnData":returnData,@"operationID":@(operationID)};
 }
@@ -497,7 +510,7 @@ NSString *const mk_communicationDataNum = @"mk_communicationDataNum";
     if ([content isEqualToString:@"d8"]) {
         return @"-40dBm";
     }
-    return @"";
+    return @"-4dBm";
 }
 
 @end
