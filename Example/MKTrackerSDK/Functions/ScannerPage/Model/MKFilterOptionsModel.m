@@ -37,22 +37,34 @@
             [self operationFailedBlockWithMsg:@"Read adv name filter error" block:failedBlock];
             return ;
         }
-        if (![self readProximityUUIDStatus]) {
-            [self operationFailedBlockWithMsg:@"Read proximity uuid filter error" block:failedBlock];
-            return ;
-        }
-        if (![self readMajorStatus]) {
-            [self operationFailedBlockWithMsg:@"Read major filter error" block:failedBlock];
-            return ;
-        }
-        if (![self readMinorStatus]) {
-            [self operationFailedBlockWithMsg:@"Read minor filter error" block:failedBlock];
-            return ;
-        }
         if (![self readRawAdvDataStatus]) {
             [self operationFailedBlockWithMsg:@"Read raw adv data filter error" block:failedBlock];
             return ;
         }
+        if (![self readProximityUUIDStatus]) {
+            [self operationFailedBlockWithMsg:@"Read proximity uuid filter error" block:failedBlock];
+            return ;
+        }
+        if (![MKDeviceTypeManager shared].supportNewCommand) {
+            if (![self readMajorStatus]) {
+                [self operationFailedBlockWithMsg:@"Read major filter error" block:failedBlock];
+                return ;
+            }
+            if (![self readMinorStatus]) {
+                [self operationFailedBlockWithMsg:@"Read minor filter error" block:failedBlock];
+                return ;
+            }
+        }else {
+            if (![self readMajorMinMaxValue]) {
+                [self operationFailedBlockWithMsg:@"Read major filter error" block:failedBlock];
+                return ;
+            }
+            if (![self readMinorMinMaxValue]) {
+                [self operationFailedBlockWithMsg:@"Read minor filter error" block:failedBlock];
+                return ;
+            }
+        }
+        
         moko_dispatch_main_safe(^{
             sucBlock();
         });
@@ -89,21 +101,32 @@
             [self operationFailedBlockWithMsg:@"Config adv name filter error" block:failedBlock];
             return;
         }
+        if (![self configRawAdvDataStatus]) {
+            [self operationFailedBlockWithMsg:@"Config raw adv data filter error" block:failedBlock];
+            return;
+        }
         if (![self configProximityUUIDStatus]) {
             [self operationFailedBlockWithMsg:@"Config proximity UUID filter error" block:failedBlock];
             return;
         }
-        if (![self configMajorStatus]) {
-            [self operationFailedBlockWithMsg:@"Config major filter error" block:failedBlock];
-            return;
-        }
-        if (![self configMinorStatus]) {
-            [self operationFailedBlockWithMsg:@"Config minor filter error" block:failedBlock];
-            return;
-        }
-        if (![self configRawAdvDataStatus]) {
-            [self operationFailedBlockWithMsg:@"Config raw adv data filter error" block:failedBlock];
-            return;
+        if (![MKDeviceTypeManager shared].supportNewCommand) {
+            if (![self configMajorStatus]) {
+                [self operationFailedBlockWithMsg:@"Config major filter error" block:failedBlock];
+                return;
+            }
+            if (![self configMinorStatus]) {
+                [self operationFailedBlockWithMsg:@"Config minor filter error" block:failedBlock];
+                return;
+            }
+        }else {
+            if (![self configMajorMaxMinValue]) {
+                [self operationFailedBlockWithMsg:@"Config major filter error" block:failedBlock];
+                return;
+            }
+            if (![self configMinorMinMaxValue]) {
+                [self operationFailedBlockWithMsg:@"Config minor filter error" block:failedBlock];
+                return;
+            }
         }
         moko_dispatch_main_safe(^{
             sucBlock();
@@ -318,6 +341,60 @@
     return success;
 }
 
+- (BOOL)readMajorMinMaxValue {
+    __block BOOL success = NO;
+    [MKTrackerInterface readMajorFilterStateWithSucBlock:^(id  _Nonnull returnData) {
+        success = YES;
+        self.majorIson = [returnData[@"result"][@"isOn"] boolValue];
+        self.majorMinValue = returnData[@"result"][@"majorMinValue"];
+        self.majorMaxValue = returnData[@"result"][@"majorMaxValue"];
+        dispatch_semaphore_signal(self.semaphore);
+    } failedBlock:^(NSError * _Nonnull error) {
+        dispatch_semaphore_signal(self.semaphore);
+    }];
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    return success;
+}
+
+- (BOOL)configMajorMaxMinValue {
+    __block BOOL success = NO;
+    [MKTrackerInterface configMajorFilterStatus:self.majorIson majorMinValue:[self.majorMinValue integerValue] majorMaxValue:[self.majorMaxValue integerValue] sucBlock:^{
+        success = YES;
+        dispatch_semaphore_signal(self.semaphore);
+    } failedBlock:^(NSError * _Nonnull error) {
+        dispatch_semaphore_signal(self.semaphore);
+    }];
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    return success;
+}
+
+- (BOOL)readMinorMinMaxValue {
+    __block BOOL success = NO;
+    [MKTrackerInterface readMinorFilterStateWithSucBlock:^(id  _Nonnull returnData) {
+        success = YES;
+        self.minorIson = [returnData[@"result"][@"isOn"] boolValue];
+        self.minorMinValue = returnData[@"result"][@"minorMinValue"];
+        self.minorMaxValue = returnData[@"result"][@"minorMaxValue"];
+        dispatch_semaphore_signal(self.semaphore);
+    } failedBlock:^(NSError * _Nonnull error) {
+        dispatch_semaphore_signal(self.semaphore);
+    }];
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    return success;
+}
+
+- (BOOL)configMinorMinMaxValue {
+    __block BOOL success = NO;
+    [MKTrackerInterface configMinorFilterStatus:self.minorIson minorMinValue:[self.minorMinValue integerValue] minorMaxValue:[self.minorMaxValue integerValue] sucBlock:^{
+        success = YES;
+        dispatch_semaphore_signal(self.semaphore);
+    } failedBlock:^(NSError * _Nonnull error) {
+        dispatch_semaphore_signal(self.semaphore);
+    }];
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    return success;
+}
+
 #pragma mark - params valid
 - (BOOL)validParams {
     if (!self.advDataFilterIson) {
@@ -334,17 +411,7 @@
         }
     }
     if (self.uuidIson) {
-        if (![MKTrackerAdopter isUUIDString:self.uuidValue]) {
-            return NO;
-        }
-    }
-    if (self.majorIson) {
-        if (!ValidStr(self.majorValue) || [self.majorValue integerValue] < 0 || [self.majorValue integerValue] > 65535) {
-            return NO;
-        }
-    }
-    if (self.minorIson) {
-        if (!ValidStr(self.minorValue) || [self.minorValue integerValue] < 0 || [self.minorValue integerValue] > 65535) {
+        if (![MKBLEBaseSDKAdopter isUUIDString:self.uuidValue]) {
             return NO;
         }
     }
@@ -353,6 +420,42 @@
             return NO;
         }
     }
+    if (![MKDeviceTypeManager shared].supportNewCommand) {
+        if (self.majorIson) {
+            if (!ValidStr(self.majorValue) || [self.majorValue integerValue] < 0 || [self.majorValue integerValue] > 65535) {
+                return NO;
+            }
+        }
+        if (self.minorIson) {
+            if (!ValidStr(self.minorValue) || [self.minorValue integerValue] < 0 || [self.minorValue integerValue] > 65535) {
+                return NO;
+            }
+        }
+    }else {
+        if (self.majorIson) {
+            if (!ValidStr(self.majorMaxValue) || [self.majorMaxValue integerValue] < 0 || [self.majorMaxValue integerValue] > 65535) {
+                return NO;
+            }
+            if (!ValidStr(self.majorMinValue) || [self.majorMinValue integerValue] < 0 || [self.majorMinValue integerValue] > 65535) {
+                return NO;
+            }
+            if ([self.majorMaxValue integerValue] < [self.majorMinValue integerValue]) {
+                return NO;
+            }
+        }
+        if (self.minorIson) {
+            if (!ValidStr(self.minorMaxValue) || [self.minorMaxValue integerValue] < 0 || [self.minorMaxValue integerValue] > 65535) {
+                return NO;
+            }
+            if (!ValidStr(self.minorMinValue) || [self.minorMinValue integerValue] < 0 || [self.minorMinValue integerValue] > 65535) {
+                return NO;
+            }
+            if ([self.minorMaxValue integerValue] < [self.minorMinValue integerValue]) {
+                return NO;
+            }
+        }
+    }
+    
     return YES;
 }
 

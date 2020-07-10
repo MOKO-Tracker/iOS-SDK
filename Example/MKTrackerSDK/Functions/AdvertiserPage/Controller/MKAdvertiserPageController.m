@@ -85,7 +85,7 @@
 
 #pragma mark - UITableViewDataSource
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 4;
+    return ([MKDeviceTypeManager shared].supportAdvTrigger ? 4 : 3);
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -194,15 +194,15 @@
         [self showParamsErrorAlert];
         return NO;
     }
-    if (![MKTrackerAdopter isUUIDString:self.dataModel.proximityUUID]) {
+    if (![MKBLEBaseSDKAdopter isUUIDString:self.dataModel.proximityUUID]) {
         [self showParamsErrorAlert];
         return NO;
     }
-    if (!ValidStr(self.dataModel.major) || [self.dataModel.major integerValue] < 0 || [self.dataModel.major integerValue] > 65535) {
+    if (!MKValidStr(self.dataModel.major) || [self.dataModel.major integerValue] < 0 || [self.dataModel.major integerValue] > 65535) {
         [self showParamsErrorAlert];
         return NO;
     }
-    if (!ValidStr(self.dataModel.minor) || [self.dataModel.minor integerValue] < 0 || [self.dataModel.minor integerValue] > 65535) {
+    if (!MKValidStr(self.dataModel.minor) || [self.dataModel.minor integerValue] < 0 || [self.dataModel.minor integerValue] > 65535) {
         [self showParamsErrorAlert];
         return NO;
     }
@@ -210,10 +210,12 @@
         [self showParamsErrorAlert];
         return NO;
     }
-    NSDictionary *conditions = self.dataModel.advTriggerConditions;
-    if ([conditions[@"isOn"] boolValue] && (!ValidStr(conditions[@"time"]) || [conditions[@"time"] integerValue] < 1 || [conditions[@"time"] integerValue] > 65535)) {
-        [self showParamsErrorAlert];
-        return NO;
+    if ([MKDeviceTypeManager shared].supportAdvTrigger) {
+        NSDictionary *conditions = self.dataModel.advTriggerConditions;
+        if ([conditions[@"isOn"] boolValue] && (!MKValidStr(conditions[@"time"]) || [conditions[@"time"] integerValue] < 1 || [conditions[@"time"] integerValue] > 65535)) {
+            [self showParamsErrorAlert];
+            return NO;
+        }
     }
     
     return YES;

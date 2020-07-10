@@ -176,6 +176,54 @@
     return [pred evaluateWithObject:character];
 }
 
++ (NSString *)binaryByhex:(NSString *)hex {
+    if (!MKValidStr(hex) || hex.length != 2 || ![self checkHexCharacter:hex]) {
+        return @"";
+    }
+    NSDictionary *hexDic = @{
+                             @"0":@"0000",@"1":@"0001",@"2":@"0010",
+                             @"3":@"0011",@"4":@"0100",@"5":@"0101",
+                             @"6":@"0110",@"7":@"0111",@"8":@"1000",
+                             @"9":@"1001",@"A":@"1010",@"a":@"1010",
+                             @"B":@"1011",@"b":@"1011",@"C":@"1100",
+                             @"c":@"1100",@"D":@"1101",@"d":@"1101",
+                             @"E":@"1110",@"e":@"1110",@"F":@"1111",
+                             @"f":@"1111",
+                             };
+    NSString *binaryString = @"";
+    for (int i=0; i<[hex length]; i++) {
+        NSRange rage;
+        rage.length = 1;
+        rage.location = i;
+        NSString *key = [hex substringWithRange:rage];
+        binaryString = [NSString stringWithFormat:@"%@%@",binaryString,
+                        [NSString stringWithFormat:@"%@",[hexDic objectForKey:key]]];
+        
+    }
+    
+    return binaryString;
+}
+
++ (BOOL)asciiString:(NSString *)content {
+    NSInteger strlen = content.length;
+    NSInteger datalen = [[content dataUsingEncoding:NSUTF8StringEncoding] length];
+    if (strlen != datalen) {
+        return NO;
+    }
+    return YES;
+}
+
++ (BOOL)isUUIDString:(NSString *)uuid{
+    NSString *uuidPatternString = @"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:uuidPatternString
+                                                                           options:NSRegularExpressionCaseInsensitive
+                                                                             error:nil];
+    NSInteger numberOfMatches = [regex numberOfMatchesInString:uuid
+                                                       options:kNilOptions
+                                                         range:NSMakeRange(0, uuid.length)];
+    return (numberOfMatches > 0);
+}
+
 #pragma mark - private method
 
 // 16进制转10进制

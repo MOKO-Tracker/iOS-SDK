@@ -35,9 +35,6 @@
 
 @property (nonatomic, strong)UITextField *confirmTextField;
 
-/// 对于04类型的设备，不支持ADV Trigger功能
-@property (nonatomic, assign)BOOL supportAdvTrigger;
-
 @end
 
 @implementation MKSettingController
@@ -52,8 +49,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSString *deviceType = [[NSUserDefaults standardUserDefaults] objectForKey:@"MKTrackerDeviceType"];
-    self.supportAdvTrigger = [deviceType isEqualToString:@"05"];
     [self loadSubViews];
     [self loadTableDatas];
     [self startReadStatus];
@@ -90,7 +85,7 @@
             self.hidesBottomBarWhenPushed = NO;
             return;
         }
-        if (self.supportAdvTrigger && indexPath.row == 3) {
+        if ([MKDeviceTypeManager shared].supportAdvTrigger && indexPath.row == 3) {
             //灵敏度
             [self triggerSensitivityMethod];
             return;
@@ -686,7 +681,7 @@
     dufModel.showRightIcon = YES;
     [self.section0List addObject:dufModel];
     
-    if (self.supportAdvTrigger) {
+    if ([MKDeviceTypeManager shared].supportAdvTrigger) {
         MKContactTrackerTextCellModel *triggerModel = [[MKContactTrackerTextCellModel alloc] init];
         triggerModel.leftMsg = @"Trigger Sensitivity";
         triggerModel.showRightIcon = YES;

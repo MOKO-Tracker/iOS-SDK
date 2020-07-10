@@ -12,6 +12,7 @@
 #import "MKScannerSliderCell.h"
 #import "MKTrackingNotifiCell.h"
 #import "MKScannerTriggerCell.h"
+#import "MKNumberOfVibCell.h"
 
 #import "MKFliterOptionsController.h"
 #import "MKTrackedDataController.h"
@@ -24,6 +25,8 @@
 @property (nonatomic, strong)MKBaseTableView *tableView;
 
 @property (nonatomic, strong)MKScannerDataModel *dataModel;
+
+@property (nonatomic, strong)NSMutableArray *cellList;
 
 @end
 
@@ -73,7 +76,7 @@
     if (indexPath.row == 1) {
         return 90.f;
     }
-    if (indexPath.row == 3) {
+    if ([MKDeviceTypeManager shared].supportAdvTrigger && indexPath.row == 3) {
         return ([self.dataModel.conditions[@"isOn"] boolValue] ? 120.f : 60.f);
     }
     return 44.f;
@@ -87,7 +90,7 @@
         self.hidesBottomBarWhenPushed = NO;
         return;
     }
-    if (indexPath.row == 4) {
+    if (indexPath.row == (self.cellList.count - 1)) {
         MKTrackedDataController *vc = [[MKTrackedDataController alloc] init];
         self.hidesBottomBarWhenPushed = YES;
         [self.navigationController pushViewController:vc animated:YES];
@@ -97,16 +100,13 @@
 }
 
 #pragma mark - UITableViewDataSource
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
-}
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 5;
+    return self.cellList.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return [self loadCellWithIndexPath:indexPath];
+    return self.cellList[indexPath.row];
 }
 
 #pragma mark - MKScannerDelegate
@@ -119,6 +119,7 @@
     if (index == 1) {
         //tracking note
         self.dataModel.trackingNote = [newValue integerValue];
+        [self updateCellListDatas];
         return;
     }
     if (index == 2) {
@@ -134,6 +135,11 @@
         }
         return;
     }
+    if (index == 3) {
+        //马达震动次数
+        self.dataModel.vibNubmer = [newValue integerValue];
+        return;
+    }
 }
 
 #pragma mark - interface
@@ -142,7 +148,7 @@
     WS(weakSelf);
     [self.dataModel startReadDatasWithSucBlock:^{
         [[MKHudManager share] hide];
-        [weakSelf.tableView reloadData];
+        [weakSelf updateCellListDatas];
     } failedBlock:^(NSError * _Nonnull error) {
         [[MKHudManager share] hide];
         [weakSelf.view showCentralToast:error.userInfo[@"errorInfo"]];
@@ -150,40 +156,51 @@
 }
 
 #pragma mark - private method
-- (UITableViewCell *)loadCellWithIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.row == 0) {
-        MKContactTrackerTextCell *cell = [MKContactTrackerTextCell initCellWithTableView:self.tableView];
-        MKContactTrackerTextCellModel *dataModel = [[MKContactTrackerTextCellModel alloc] init];
-        dataModel.leftMsg = @"Filter Options";
-        dataModel.showRightIcon = YES;
-        cell.dataModel = dataModel;
-        return cell;
+
+- (void)updateCellListDatas {
+    [self.cellList removeAllObjects];
+    
+    MKContactTrackerTextCell *optionsCell = [MKContactTrackerTextCell initCellWithTableView:self.tableView];
+    MKContactTrackerTextCellModel *optionsDataModel = [[MKContactTrackerTextCellModel alloc] init];
+    optionsDataModel.leftMsg = @"Filter Options";
+    optionsDataModel.showRightIcon = YES;
+    optionsCell.dataModel = optionsDataModel;
+    [self.cellList addObject:optionsCell];
+    
+    MKScannerSliderCell *sliderCell = [MKScannerSliderCell initCellWithTableView:self.tableView];
+    sliderCell.interval = self.dataModel.interval;
+    sliderCell.delegate = self;
+    [self.cellList addObject:sliderCell];
+    
+    MKTrackingNotifiCell *noteCell = [MKTrackingNotifiCell initCellWithTableView:self.tableView];
+    noteCell.trackingNote = self.dataModel.trackingNote;
+    noteCell.delegate = self;
+    [self.cellList addObject:noteCell];
+    
+    if ([MKDeviceTypeManager shared].supportNewCommand) {
+        if (self.dataModel.trackingNote == 2 || self.dataModel.trackingNote == 3) {
+            MKNumberOfVibCell *vibCell = [MKNumberOfVibCell initCellWithTableView:self.tableView];
+            vibCell.number = self.dataModel.vibNubmer;
+            vibCell.delegate = self;
+            [self.cellList addObject:vibCell];
+        }
     }
-    if (indexPath.row == 1) {
-        MKScannerSliderCell *cell = [MKScannerSliderCell initCellWithTableView:self.tableView];
-        cell.interval = self.dataModel.interval;
-        cell.delegate = self;
-        return cell;
+    
+    if ([MKDeviceTypeManager shared].supportAdvTrigger) {
+        MKScannerTriggerCell *scannerCell = [MKScannerTriggerCell initCellWithTableView:self.tableView];
+        scannerCell.conditions = self.dataModel.conditions;
+        scannerCell.delegate = self;
+        [self.cellList addObject:scannerCell];
     }
-    if (indexPath.row == 2) {
-        MKTrackingNotifiCell *cell = [MKTrackingNotifiCell initCellWithTableView:self.tableView];
-        cell.trackingNote = self.dataModel.trackingNote;
-        cell.delegate = self;
-        return cell;
-    }
-    if (indexPath.row == 3) {
-        MKScannerTriggerCell *cell = [MKScannerTriggerCell initCellWithTableView:self.tableView];
-        cell.conditions = self.dataModel.conditions;
-        cell.delegate = self;
-        
-        return cell;
-    }
-    MKContactTrackerTextCell *cell = [MKContactTrackerTextCell initCellWithTableView:self.tableView];
-    MKContactTrackerTextCellModel *dataModel = [[MKContactTrackerTextCellModel alloc] init];
-    dataModel.leftMsg = @"Tracked Data";
-    dataModel.showRightIcon = YES;
-    cell.dataModel = dataModel;
-    return cell;
+    
+    MKContactTrackerTextCell *trackerCell = [MKContactTrackerTextCell initCellWithTableView:self.tableView];
+    MKContactTrackerTextCellModel *trackerDataModel = [[MKContactTrackerTextCellModel alloc] init];
+    trackerDataModel.leftMsg = @"Tracked Data";
+    trackerDataModel.showRightIcon = YES;
+    trackerCell.dataModel = trackerDataModel;
+    [self.cellList addObject:trackerCell];
+    
+    [self.tableView reloadData];
 }
 
 #pragma mark - UI
@@ -218,6 +235,13 @@
         _dataModel = [[MKScannerDataModel alloc] init];
     }
     return _dataModel;
+}
+
+- (NSMutableArray *)cellList {
+    if (!_cellList) {
+        _cellList = [NSMutableArray array];
+    }
+    return _cellList;
 }
 
 @end

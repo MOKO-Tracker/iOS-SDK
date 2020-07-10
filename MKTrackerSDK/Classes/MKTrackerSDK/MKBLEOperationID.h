@@ -32,12 +32,15 @@ typedef NS_ENUM(NSInteger, mk_taskOperationID) {
     mk_taskReadProximityUUIDFilterStatusOperation,
     mk_taskReadMajorFilterStatusOperation,
     mk_taskReadMinorFilterStatusOperation,
+    mk_taskReadMajorFilterStateOperation,
+    mk_taskReadMinorFilterStateOperation,
     mk_taskReadRawAdvDataFilterStatusOperation,
     mk_taskReadScanStatusOperation,
     mk_taskReadConnectableStatusOperation,
     mk_taskReadButtonPowerStatusOperation,
     mk_taskReadMovementSensitivityOperation,
     mk_taskReadScanWindowDataOperation,
+    mk_taskReadNumberOfVibrationsOperation,
     
 #pragma mark - Config
     mk_taskConfigDateOperation,             //设置时间
@@ -59,6 +62,8 @@ typedef NS_ENUM(NSInteger, mk_taskOperationID) {
     mk_taskConfigProximityUUIDFilterStatusOperation,
     mk_taskConfigMajorFilterStatusOperation,
     mk_taskConfigMinorFilterStatusOperation,
+    mk_taskConfigMajorFilterStateOperation,
+    mk_taskConfigMinorFilterStateOperation,
     mk_taskConfigRawAdvDataFilterStatusOperation,
     mk_taskConfigScanStatusOperation,
     mk_taskConfigConnectableStatusOperation,
@@ -70,4 +75,5 @@ typedef NS_ENUM(NSInteger, mk_taskOperationID) {
     mk_taskConfigPasswordOperation,               //密码
     mk_taskClearAllDatasOperation,
     mk_taskSendVibrationCommandsOperation,
+    mk_taskConfigNumberOfVibrationsOperation,
 };

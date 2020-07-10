@@ -29,7 +29,9 @@
     self.interval = model.interval;
     self.measurePower = model.measurePower;
     self.txPower = model.txPower;
-    self.advTriggerConditions = [NSDictionary dictionaryWithDictionary:model.advTriggerConditions];
+    if ([MKDeviceTypeManager shared].supportAdvTrigger) {
+        self.advTriggerConditions = [NSDictionary dictionaryWithDictionary:model.advTriggerConditions];
+    }
 }
 
 - (void)startReadDatasWithSucBlock:(void (^)(void))sucBlock
@@ -63,9 +65,11 @@
             [self operationFailedBlockWithMsg:@"Read txPower error" block:failedBlock];
             return ;
         }
-        if (![self readADVTriggerConditions]) {
-            [self operationFailedBlockWithMsg:@"Read conditions error" block:failedBlock];
-            return ;
+        if ([MKDeviceTypeManager shared].supportAdvTrigger) {
+            if (![self readADVTriggerConditions]) {
+                [self operationFailedBlockWithMsg:@"Read conditions error" block:failedBlock];
+                return ;
+            }
         }
         moko_dispatch_main_safe(^{
             sucBlock();
@@ -105,19 +109,22 @@
             [self operationFailedBlockWithMsg:@"Config Tx Power error" block:failedBlock];
             return ;
         }
-        if (![dataModel.advTriggerConditions[@"isOn"] boolValue]) {
-            //关闭
-            if (![self closeTriggerConditions]) {
-                [self operationFailedBlockWithMsg:@"Config trigger conditions error" block:failedBlock];
-                return ;
-            }
-        }else {
-            //打开
-            if (![self configTriggerConditions:[dataModel.advTriggerConditions[@"time"] integerValue]]) {
-                [self operationFailedBlockWithMsg:@"Config trigger conditions error" block:failedBlock];
-                return ;
+        if ([MKDeviceTypeManager shared].supportAdvTrigger) {
+            if (![dataModel.advTriggerConditions[@"isOn"] boolValue]) {
+                //关闭
+                if (![self closeTriggerConditions]) {
+                    [self operationFailedBlockWithMsg:@"Config trigger conditions error" block:failedBlock];
+                    return ;
+                }
+            }else {
+                //打开
+                if (![self configTriggerConditions:[dataModel.advTriggerConditions[@"time"] integerValue]]) {
+                    [self operationFailedBlockWithMsg:@"Config trigger conditions error" block:failedBlock];
+                    return ;
+                }
             }
         }
+        
         moko_dispatch_main_safe(^{
             sucBlock();
         });

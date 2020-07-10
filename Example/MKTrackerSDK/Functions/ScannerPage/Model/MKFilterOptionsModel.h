@@ -30,11 +30,25 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign)BOOL majorIson;
 
+/// 对于不支持新功能(V3.0.0版本的设备)的设备来说，使用这个过滤值
 @property (nonatomic, copy)NSString *majorValue;
+
+/// 对于支持新功能(V3.1.0以上)的设备来说，过滤的Major可以是一个范围值
+@property (nonatomic, copy)NSString *majorMaxValue;
+
+/// 对于支持新功能(V3.1.0以上)的设备来说，过滤的Major可以是一个范围值
+@property (nonatomic, copy)NSString *majorMinValue;
 
 @property (nonatomic, assign)BOOL minorIson;
 
+/// 对于不支持新功能(V3.0.0版本的设备)的设备来说，使用这个过滤值
 @property (nonatomic, copy)NSString *minorValue;
+
+//对于支持新功能(V3.1.0以上)的设备来说，过滤的Minor可以是一个范围值
+@property (nonatomic, copy)NSString *minorMaxValue;
+
+//对于支持新功能(V3.1.0以上)的设备来说，过滤的Minor可以是一个范围值
+@property (nonatomic, copy)NSString *minorMinValue;
 
 @property (nonatomic, assign)BOOL rawDataIson;
 

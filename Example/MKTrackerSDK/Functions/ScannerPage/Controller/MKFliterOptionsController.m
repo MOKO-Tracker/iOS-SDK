@@ -11,18 +11,22 @@
 #import "MKAdvDataFliterCell.h"
 #import "MKFliterRssiValueCell.h"
 #import "MKFilterAdvSwitchCell.h"
+#import "MKFilterMajorMinorCell.h"
 
+#import "MKFilterMajorMinorCellModel.h"
 #import "MKAdvDataFliterCellModel.h"
 #import "MKFilterOptionsModel.h"
 
 static NSInteger const statusOnHeight = 85.f;
 static NSInteger const statusOffHeight = 44.f;
 
-@interface MKFliterOptionsController ()<UITableViewDelegate, UITableViewDataSource, MKAdvDataFliterCellDelegate, MKFilterAdvSwitchCellDelegate, MKFliterRssiValueCellDelegate>
+@interface MKFliterOptionsController ()<UITableViewDelegate, UITableViewDataSource, MKAdvDataFliterCellDelegate, MKFilterAdvSwitchCellDelegate, MKFliterRssiValueCellDelegate, MKFilterMajorMinorCellDelegate>
 
 @property (nonatomic, strong)MKBaseTableView *tableView;
 
-@property (nonatomic, strong)NSMutableArray *dataList;
+@property (nonatomic, strong)NSMutableArray *section2List;
+
+@property (nonatomic, strong)NSMutableArray *section3List;
 
 @property (nonatomic, strong)MKFilterOptionsModel *optionsModel;
 
@@ -70,14 +74,17 @@ static NSInteger const statusOffHeight = 44.f;
 
 #pragma mark - UITableViewDataSource
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 3;
+    return 4;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     if (section == 0 || section == 1) {
         return 1;
     }
-    return (self.optionsModel.advDataFilterIson ? self.dataList.count : 0);
+    if (section == 2) {
+        return (self.optionsModel.advDataFilterIson ? self.section2List.count : 0);
+    }
+    return (self.optionsModel.advDataFilterIson ? self.section3List.count : 0);
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -87,7 +94,7 @@ static NSInteger const statusOffHeight = 44.f;
 #pragma mark - MKFilterAdvSwitchCellDelegate
 - (void)filterAdvSwitchStatusChanged:(BOOL)isOn {
     self.optionsModel.advDataFilterIson = isOn;
-    [self.tableView reloadSection:2 withRowAnimation:UITableViewRowAnimationNone];
+    [self.tableView reloadData];
 }
 
 #pragma mark - MKAdvDataFliterCellDelegate
@@ -99,21 +106,27 @@ static NSInteger const statusOffHeight = 44.f;
         //adv name
         self.optionsModel.advNameIson = isOn;
     }else if (index == 2) {
-        //uuid
-        self.optionsModel.uuidIson = isOn;
-    }else if (index == 3) {
-        //major
-        self.optionsModel.majorIson = isOn;
-    }else if (index == 4) {
-        //minor
-        self.optionsModel.minorIson = isOn;
-    }else if (index == 5) {
         //raw adv data
         self.optionsModel.rawDataIson = isOn;
+    }else if (index == 3) {
+        //uuid
+        self.optionsModel.uuidIson = isOn;
+    }else if (index == 4) {
+        //major
+        self.optionsModel.majorIson = isOn;
+    }else if (index == 5) {
+        //minor
+        self.optionsModel.minorIson = isOn;
     }
-    MKAdvDataFliterCellModel *dataModel = self.dataList[index];
+    if (index < 4) {
+        MKAdvDataFliterCellModel *dataModel = self.section2List[index];
+        dataModel.isOn = isOn;
+        [self.tableView reloadRow:index inSection:2 withRowAnimation:UITableViewRowAnimationNone];
+        return;
+    }
+    MKAdvDataFliterCellModel *dataModel = self.section3List[index - 4];
     dataModel.isOn = isOn;
-    [self.tableView reloadRow:index inSection:2 withRowAnimation:UITableViewRowAnimationNone];
+    [self.tableView reloadRow:(index - 4) inSection:3 withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (void)advertiserFilterContent:(NSString *)newValue index:(NSInteger)index {
@@ -124,25 +137,64 @@ static NSInteger const statusOffHeight = 44.f;
         //adv name
         self.optionsModel.advNameValue = newValue;
     }else if (index == 2) {
-        //uuid
-        self.optionsModel.uuidValue = newValue;
-    }else if (index == 3) {
-        //major
-        self.optionsModel.majorValue = newValue;
-    }else if (index == 4) {
-        //minor
-        self.optionsModel.minorValue = newValue;
-    }else if (index == 5) {
         //raw adv data
         self.optionsModel.rawDataValue = newValue;
+    }else if (index == 3) {
+        //uuid
+        self.optionsModel.uuidValue = newValue;
+    }else if (index == 4) {
+        //major
+        self.optionsModel.majorValue = newValue;
+    }else if (index == 5) {
+        //minor
+        self.optionsModel.minorValue = newValue;
     }
-    MKAdvDataFliterCellModel *dataModel = self.dataList[index];
-    dataModel.textFieldValue = newValue;
+    if (index < 4) {
+        MKAdvDataFliterCellModel *dataModel = self.section2List[index];
+        dataModel.textFieldValue = newValue;
+    }else {
+        MKAdvDataFliterCellModel *dataModel = self.section3List[index - 4];
+        dataModel.textFieldValue = newValue;
+    }
 }
 
 #pragma mark - MKFliterRssiValueCellDelegate
 - (void)mk_fliterRssiValueChanged:(NSInteger)rssi {
     self.optionsModel.rssiValue = rssi;
+}
+
+#pragma mark - MKFilterMajorMinorCellDelegate
+- (void)majorMinorFliterSwitchStatusChanged:(BOOL)isOn index:(NSInteger)index {
+    if (index == 0) {
+        //Major
+        self.optionsModel.majorIson = isOn;
+    }else if (index == 1) {
+        //Minor
+        self.optionsModel.minorIson = isOn;
+    }
+    MKFilterMajorMinorCellModel *dataModel = self.section3List[index];
+    dataModel.isOn = isOn;
+    [self.tableView reloadRow:index inSection:3 withRowAnimation:UITableViewRowAnimationNone];
+}
+
+- (void)filterMaxValueContentChanged:(NSString *)newValue index:(NSInteger)index {
+    if (index == 0) {
+        self.optionsModel.majorMaxValue = newValue;
+    }else if (index == 1) {
+        self.optionsModel.minorMaxValue = newValue;
+    }
+    MKFilterMajorMinorCellModel * dataModel = self.section3List[index];
+    dataModel.maxValue = newValue;
+}
+
+- (void)filterMinValueContentChanged:(NSString *)newValue index:(NSInteger)index {
+    if (index == 0) {
+        self.optionsModel.majorMinValue = newValue;
+    }else if (index == 1) {
+        self.optionsModel.minorMinValue = newValue;
+    }
+    MKFilterMajorMinorCellModel * dataModel = self.section3List[index];
+    dataModel.minValue = newValue;
 }
 
 #pragma mark - private method
@@ -156,22 +208,25 @@ static NSInteger const statusOffHeight = 44.f;
     if (!self.optionsModel.advDataFilterIson) {
         return 44.f;
     }
-    if (indexPath.row == 0) {
-        return (self.optionsModel.macIson ? statusOnHeight : statusOffHeight);
-    }
-    if (indexPath.row == 1) {
-        return (self.optionsModel.advNameIson ? statusOnHeight : statusOffHeight);
-    }
-    if (indexPath.row == 2) {
+    if (indexPath.section == 2) {
+        if (indexPath.row == 0) {
+            return (self.optionsModel.macIson ? statusOnHeight : statusOffHeight);
+        }
+        if (indexPath.row == 1) {
+            return (self.optionsModel.advNameIson ? statusOnHeight : statusOffHeight);
+        }
+        if (indexPath.row == 2) {
+            return (self.optionsModel.rawDataIson ? statusOnHeight : statusOffHeight);
+        }
         return (self.optionsModel.uuidIson ? statusOnHeight : statusOffHeight);
     }
-    if (indexPath.row == 3) {
+    if (indexPath.row == 0) {
         return (self.optionsModel.majorIson ? statusOnHeight : statusOffHeight);
     }
-    if (indexPath.row == 4) {
+    if (indexPath.row == 1) {
         return (self.optionsModel.minorIson ? statusOnHeight : statusOffHeight);
     }
-    return (self.optionsModel.rawDataIson ? statusOnHeight : statusOffHeight);
+    return 0.f;
 }
 
 - (UITableViewCell *)loadCellWithIndexPath:(NSIndexPath *)indexPath {
@@ -187,8 +242,21 @@ static NSInteger const statusOffHeight = 44.f;
         cell.isOn = self.optionsModel.advDataFilterIson;
         return cell;
     }
-    MKAdvDataFliterCell *cell = [MKAdvDataFliterCell initCellWithTableView:self.tableView];
-    cell.dataModel = self.dataList[indexPath.row];
+    if (indexPath.section == 2) {
+        MKAdvDataFliterCell *cell = [MKAdvDataFliterCell initCellWithTableView:self.tableView];
+        cell.dataModel = self.section2List[indexPath.row];
+        cell.delegate = self;
+        return cell;
+    }
+    if (![MKDeviceTypeManager shared].supportNewCommand) {
+        MKAdvDataFliterCell *cell = [MKAdvDataFliterCell initCellWithTableView:self.tableView];
+        cell.dataModel = self.section3List[indexPath.row];
+        cell.delegate = self;
+        return cell;
+    }
+    //支持新协议的(V3.1.0以上)可以过滤Major和Minor的范围
+    MKFilterMajorMinorCell *cell = [MKFilterMajorMinorCell initCellWithTableView:self.tableView];
+    cell.dataModel = self.section3List[indexPath.row];
     cell.delegate = self;
     return cell;
 }
@@ -214,7 +282,7 @@ static NSInteger const statusOffHeight = 44.f;
     macModel.index = 0;
     macModel.textFieldValue = self.optionsModel.macValue;
     macModel.isOn = self.optionsModel.macIson;
-    [self.dataList addObject:macModel];
+    [self.section2List addObject:macModel];
     
     MKAdvDataFliterCellModel *advNameModel = [[MKAdvDataFliterCellModel alloc] init];
     advNameModel.msg = @"Filter by ADV Name";
@@ -224,47 +292,65 @@ static NSInteger const statusOffHeight = 44.f;
     advNameModel.index = 1;
     advNameModel.textFieldValue = self.optionsModel.advNameValue;
     advNameModel.isOn = self.optionsModel.advNameIson;
-    [self.dataList addObject:advNameModel];
-    
-    MKAdvDataFliterCellModel *uuidModel = [[MKAdvDataFliterCellModel alloc] init];
-    uuidModel.msg = @"Filter by iBeacon Proximity UUID";
-    uuidModel.textPlaceholder = @"16 Bytes";
-    uuidModel.textFieldType = uuidMode;
-    uuidModel.maxLength = 36;
-    uuidModel.index = 2;
-    uuidModel.textFieldValue = self.optionsModel.uuidValue;
-    uuidModel.isOn = self.optionsModel.uuidIson;
-    [self.dataList addObject:uuidModel];
-    
-    MKAdvDataFliterCellModel *majorModel = [[MKAdvDataFliterCellModel alloc] init];
-    majorModel.msg = @"Filter by iBeacon Major";
-    majorModel.textPlaceholder = @"0 ~ 65535";
-    majorModel.textFieldType = realNumberOnly;
-    majorModel.maxLength = 5;
-    majorModel.index = 3;
-    majorModel.textFieldValue = self.optionsModel.majorValue;
-    majorModel.isOn = self.optionsModel.majorIson;
-    [self.dataList addObject:majorModel];
-    
-    MKAdvDataFliterCellModel *minorModel = [[MKAdvDataFliterCellModel alloc] init];
-    minorModel.msg = @"Filter by iBeacon Minor";
-    minorModel.textPlaceholder = @"0 ~ 65535";
-    minorModel.textFieldType = realNumberOnly;
-    minorModel.maxLength = 5;
-    minorModel.index = 4;
-    minorModel.textFieldValue = self.optionsModel.minorValue;
-    minorModel.isOn = self.optionsModel.minorIson;
-    [self.dataList addObject:minorModel];
+    [self.section2List addObject:advNameModel];
     
     MKAdvDataFliterCellModel *rawDataModel = [[MKAdvDataFliterCellModel alloc] init];
     rawDataModel.msg = @"Filter by Raw Adv Data";
     rawDataModel.textPlaceholder = @"1 ~ 31 Bytes";
     rawDataModel.textFieldType = hexCharOnly;
     rawDataModel.maxLength = 62;
-    rawDataModel.index = 5;
+    rawDataModel.index = 2;
     rawDataModel.textFieldValue = self.optionsModel.rawDataValue;
     rawDataModel.isOn = self.optionsModel.rawDataIson;
-    [self.dataList addObject:rawDataModel];
+    [self.section2List addObject:rawDataModel];
+    
+    MKAdvDataFliterCellModel *uuidModel = [[MKAdvDataFliterCellModel alloc] init];
+    uuidModel.msg = @"Filter by iBeacon Proximity UUID";
+    uuidModel.textPlaceholder = @"16 Bytes";
+    uuidModel.textFieldType = uuidMode;
+    uuidModel.maxLength = 36;
+    uuidModel.index = 3;
+    uuidModel.textFieldValue = self.optionsModel.uuidValue;
+    uuidModel.isOn = self.optionsModel.uuidIson;
+    [self.section2List addObject:uuidModel];
+    
+    if (![MKDeviceTypeManager shared].supportNewCommand) {
+        MKAdvDataFliterCellModel *majorModel = [[MKAdvDataFliterCellModel alloc] init];
+        majorModel.msg = @"Filter by iBeacon Major";
+        majorModel.textPlaceholder = @"0 ~ 65535";
+        majorModel.textFieldType = realNumberOnly;
+        majorModel.maxLength = 5;
+        majorModel.index = 4;
+        majorModel.textFieldValue = self.optionsModel.majorValue;
+        majorModel.isOn = self.optionsModel.majorIson;
+        [self.section3List addObject:majorModel];
+        
+        MKAdvDataFliterCellModel *minorModel = [[MKAdvDataFliterCellModel alloc] init];
+        minorModel.msg = @"Filter by iBeacon Minor";
+        minorModel.textPlaceholder = @"0 ~ 65535";
+        minorModel.textFieldType = realNumberOnly;
+        minorModel.maxLength = 5;
+        minorModel.index = 5;
+        minorModel.textFieldValue = self.optionsModel.minorValue;
+        minorModel.isOn = self.optionsModel.minorIson;
+        [self.section3List addObject:minorModel];
+    }else {
+        MKFilterMajorMinorCellModel *majorModel = [[MKFilterMajorMinorCellModel alloc] init];
+        majorModel.msg = @"Filter by iBeacon Major";
+        majorModel.minValue = self.optionsModel.majorMinValue;
+        majorModel.maxValue = self.optionsModel.majorMaxValue;
+        majorModel.index = 0;
+        majorModel.isOn = self.optionsModel.majorIson;
+        [self.section3List addObject:majorModel];
+        
+        MKFilterMajorMinorCellModel *minorModel = [[MKFilterMajorMinorCellModel alloc] init];
+        minorModel.msg = @"Filter by iBeacon Minor";
+        minorModel.minValue = self.optionsModel.minorMinValue;
+        minorModel.maxValue = self.optionsModel.minorMaxValue;
+        minorModel.index = 1;
+        minorModel.isOn = self.optionsModel.minorIson;
+        [self.section3List addObject:minorModel];
+    }
     
     [self.tableView reloadData];
 }
@@ -296,18 +382,25 @@ static NSInteger const statusOffHeight = 44.f;
     return _tableView;
 }
 
-- (NSMutableArray *)dataList {
-    if (!_dataList) {
-        _dataList = [NSMutableArray array];
-    }
-    return _dataList;
-}
-
 - (MKFilterOptionsModel *)optionsModel {
     if (!_optionsModel) {
         _optionsModel = [[MKFilterOptionsModel alloc] init];
     }
     return _optionsModel;
+}
+
+- (NSMutableArray *)section2List {
+    if (!_section2List) {
+        _section2List = [NSMutableArray array];
+    }
+    return _section2List;
+}
+
+- (NSMutableArray *)section3List {
+    if (!_section3List) {
+        _section3List = [NSMutableArray array];
+    }
+    return _section3List;
 }
 
 @end

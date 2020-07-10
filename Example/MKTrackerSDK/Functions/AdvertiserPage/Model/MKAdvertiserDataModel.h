@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, copy)NSString *txPower;
 
+/// 04类型的设备不支持
 @property (nonatomic, strong)NSDictionary *advTriggerConditions;
 
 - (void)updateValueWithModel:(MKAdvertiserDataModel *)model;

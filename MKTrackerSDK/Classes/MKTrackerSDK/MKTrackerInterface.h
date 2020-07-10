@@ -14,6 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Device Service Information
 
+#pragma mark - Device Service Information
+
 /// Read the battery level of the device
 /// @param sucBlock Success callback
 /// @param failedBlock Failure callback
@@ -67,7 +69,7 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark -
 
 /// Reading device type.
-/// The device without 3-axis sensor is 0x04, the device with 3-axis sensor is 0x05
+/// The device without 3-axis sensor and flash is 0x04, the device with 3-axis sensor is 0x05,the device with flash is 0x06,the device with 3-axis sensor and flash is 0x07.
 /// @param sucBlock Success callback
 /// @param failedBlock Failure callback
 + (void)readTrackerDeviceTypeWithSucBlock:(nonnull void (^)(id returnData))sucBlock
@@ -176,17 +178,29 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)readProximityUUIDFilterStatusWithSucBlock:(nonnull void (^)(id returnData))sucBlock
                                       failedBlock:(nonnull void (^)(NSError *error))failedBlock;
 
-/// Whether the filtering of the major of the device is turned on.
+/// Whether the filtering of the major of the device is turned on.(Firmware:V3.0.0)
 /// @param sucBlock Success callback
 /// @param failedBlock Failure callback
 + (void)readMajorFilterStatusWithSucBlock:(nonnull void (^)(id returnData))sucBlock
                               failedBlock:(nonnull void (^)(NSError *error))failedBlock;
 
-/// Whether the filtering of the minor of the device is turned on.
+/// Whether the filtering of the minor of the device is turned on.(Firmware:V3.0.0)
 /// @param sucBlock Success callback
 /// @param failedBlock Failure callback
 + (void)readMinorFilterStatusWithSucBlock:(nonnull void (^)(id returnData))sucBlock
                               failedBlock:(nonnull void (^)(NSError *error))failedBlock;
+
+/// Whether the filtering of the major of the device is turned on.(Firmware:V3.1.0 or later)
+/// @param sucBlock Success callback
+/// @param failedBlock Failure callback
++ (void)readMajorFilterStateWithSucBlock:(nonnull void (^)(id returnData))sucBlock
+                             failedBlock:(nonnull void (^)(NSError *error))failedBlock;
+
+/// Whether the filtering of the minor of the device is turned on.(Firmware:V3.1.0 or later)
+/// @param sucBlock Success callback
+/// @param failedBlock Failure callback
++ (void)readMinorFilterStateWithSucBlock:(nonnull void (^)(id returnData))sucBlock
+                             failedBlock:(nonnull void (^)(NSError *error))failedBlock;
 
 /// Whether the filtering of the raw advertising data of the device is turned on.
 /// @param sucBlock Success callback
@@ -223,6 +237,12 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param failedBlock Failure callback
 + (void)readScanWindowDataWithSucBlock:(nonnull void (^)(id returnData))sucBlock
                            failedBlock:(nonnull void (^)(NSError *error))failedBlock;
+
+/// Read current motor vibration times.
+/// @param sucBlock Success callback
+/// @param failedBlock Failure callback
++ (void)readNumberOfVibrationsWithSucBlock:(nonnull void (^)(id returnData))sucBlock
+                               failedBlock:(nonnull void (^)(NSError *error))failedBlock;
 
 @end
 

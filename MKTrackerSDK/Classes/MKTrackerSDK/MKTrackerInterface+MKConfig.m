@@ -438,6 +438,92 @@
                      failedBlock:failedBlock];
 }
 
++ (void)configMajorFilterStatus:(BOOL)isOn
+                  majorMinValue:(NSInteger)majorMinValue
+                  majorMaxValue:(NSInteger)majorMaxValue
+                       sucBlock:(void (^)(void))sucBlock
+                    failedBlock:(void (^)(NSError *error))failedBlock {
+    if (!isOn) {
+        [self addTaskWithOperationID:mk_taskConfigMajorFilterStateOperation
+                      characteristic:centralManager.peripheral.custom
+                         commandData:@"ea73000100"
+                            sucBlock:sucBlock
+                         failedBlock:failedBlock];
+        return;
+    }
+    if (majorMinValue < 0 || majorMinValue > 65535
+        || majorMaxValue < 0 || majorMaxValue > 65535
+        || majorMinValue > majorMaxValue) {
+        [self operationParamsErrorBlock:failedBlock];
+        return;
+    }
+    NSString *majorMinHex = [NSString stringWithFormat:@"%1lx",(unsigned long)majorMinValue];
+    if (majorMinHex.length == 1) {
+        majorMinHex = [@"000" stringByAppendingString:majorMinHex];
+    }else if (majorMinHex.length == 2){
+        majorMinHex = [@"00" stringByAppendingString:majorMinHex];
+    }else if (majorMinHex.length == 3){
+        majorMinHex = [@"0" stringByAppendingString:majorMinHex];
+    }
+    NSString *majorMaxHex = [NSString stringWithFormat:@"%1lx",(unsigned long)majorMaxValue];
+    if (majorMaxHex.length == 1) {
+        majorMaxHex = [@"000" stringByAppendingString:majorMaxHex];
+    }else if (majorMaxHex.length == 2){
+        majorMaxHex = [@"00" stringByAppendingString:majorMaxHex];
+    }else if (majorMaxHex.length == 3){
+        majorMaxHex = [@"0" stringByAppendingString:majorMaxHex];
+    }
+    NSString *commandString = [NSString stringWithFormat:@"%@%@%@",@"ea730004",majorMinHex,majorMaxHex];
+    [self addTaskWithOperationID:mk_taskConfigMajorFilterStateOperation
+                  characteristic:centralManager.peripheral.custom
+                     commandData:commandString
+                        sucBlock:sucBlock
+                     failedBlock:failedBlock];
+}
+
++ (void)configMinorFilterStatus:(BOOL)isOn
+                  minorMinValue:(NSInteger)minorMinValue
+                  minorMaxValue:(NSInteger)minorMaxValue
+                       sucBlock:(void (^)(void))sucBlock
+                    failedBlock:(void (^)(NSError *error))failedBlock {
+    if (!isOn) {
+        [self addTaskWithOperationID:mk_taskConfigMinorFilterStateOperation
+                      characteristic:centralManager.peripheral.custom
+                         commandData:@"ea74000100"
+                            sucBlock:sucBlock
+                         failedBlock:failedBlock];
+        return;
+    }
+    if (minorMinValue < 0 || minorMinValue > 65535
+        || minorMaxValue < 0 || minorMaxValue > 65535
+        || minorMinValue > minorMaxValue) {
+        [self operationParamsErrorBlock:failedBlock];
+        return;
+    }
+    NSString *minorMinHex = [NSString stringWithFormat:@"%1lx",(unsigned long)minorMinValue];
+    if (minorMinHex.length == 1) {
+        minorMinHex = [@"000" stringByAppendingString:minorMinHex];
+    }else if (minorMinHex.length == 2){
+        minorMinHex = [@"00" stringByAppendingString:minorMinHex];
+    }else if (minorMinHex.length == 3){
+        minorMinHex = [@"0" stringByAppendingString:minorMinHex];
+    }
+    NSString *minorMaxHex = [NSString stringWithFormat:@"%1lx",(unsigned long)minorMaxValue];
+    if (minorMaxHex.length == 1) {
+        minorMaxHex = [@"000" stringByAppendingString:minorMaxHex];
+    }else if (minorMaxHex.length == 2){
+        minorMaxHex = [@"00" stringByAppendingString:minorMaxHex];
+    }else if (minorMaxHex.length == 3){
+        minorMaxHex = [@"0" stringByAppendingString:minorMaxHex];
+    }
+    NSString *commandString = [NSString stringWithFormat:@"%@%@%@",@"ea740004",minorMinHex,minorMaxHex];
+    [self addTaskWithOperationID:mk_taskConfigMinorFilterStateOperation
+                  characteristic:centralManager.peripheral.custom
+                     commandData:commandString
+                        sucBlock:sucBlock
+                     failedBlock:failedBlock];
+}
+
 + (void)configRawAdvDataFilterStatus:(BOOL)isOn
                           rawAdvData:(NSString *)rawAdvData
                             sucBlock:(void (^)(void))sucBlock
@@ -600,7 +686,26 @@
                                       failedBlock:(void (^)(NSError *error))failedBlock {
     [self addTaskWithOperationID:mk_taskSendVibrationCommandsOperation
                   characteristic:centralManager.peripheral.custom
-                     commandData:@"eaf10000"
+                     commandData:@"ea610000"
+                        sucBlock:sucBlock
+                     failedBlock:failedBlock];
+}
+
++ (void)configNumberOfVibrations:(NSInteger)numbers
+                        sucBlock:(void (^)(void))sucBlock
+                     failedBlock:(void (^)(NSError *error))failedBlock {
+    if (numbers < 1 || numbers > 10) {
+        [self operationParamsErrorBlock:failedBlock];
+        return;
+    }
+    NSString *string = [NSString stringWithFormat:@"%1lx",(unsigned long)numbers];
+    if (string.length == 1) {
+        string = [@"0" stringByAppendingString:string];
+    }
+    NSString *commandString = [@"ea720001" stringByAppendingString:string];
+    [self addTaskWithOperationID:mk_taskConfigNumberOfVibrationsOperation
+                  characteristic:centralManager.peripheral.custom
+                     commandData:commandString
                         sucBlock:sucBlock
                      failedBlock:failedBlock];
 }

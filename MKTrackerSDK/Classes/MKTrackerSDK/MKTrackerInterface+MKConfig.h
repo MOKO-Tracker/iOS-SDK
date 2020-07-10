@@ -209,7 +209,7 @@ typedef NS_ENUM(NSInteger, mk_scannWindowType) {
                                sucBlock:(void (^)(void))sucBlock
                             failedBlock:(void (^)(NSError *error))failedBlock;
 
-/// Set the current major filtering conditions
+/// Set the current major filtering conditions.(Firmware Version 3.0.0)
 /// @param isOn Whether to enable major filtering
 /// @param major The major to be filtered. This value is invalid when isOn = NO.0~65535
 /// @param sucBlock Success callback
@@ -219,13 +219,37 @@ typedef NS_ENUM(NSInteger, mk_scannWindowType) {
                        sucBlock:(void (^)(void))sucBlock
                     failedBlock:(void (^)(NSError *error))failedBlock;
 
-/// Set the current minor filtering conditions.
+/// Set the current minor filtering conditions.(Firmware Version 3.0.0)
 /// @param isOn Whether to enable minor filtering
 /// @param minor The minor to be filtered. This value is invalid when isOn = NO.0~65535
 /// @param sucBlock Success callback
 /// @param failedBlock Failure callback
 + (void)configMinorFilterStatus:(BOOL)isOn
                           minor:(NSInteger)minor
+                       sucBlock:(void (^)(void))sucBlock
+                    failedBlock:(void (^)(NSError *error))failedBlock;
+
+/// Set the current major filtering conditions.(Firmware Version 3.1.0 or later)
+/// @param isOn Whether to enable major filtering
+/// @param majorMinValue Major minimum value to be filtered. This value is invalid when isOn = NO.0~65535 && majorMinValue<=majorMaxValue
+/// @param majorMaxValue The maximum value of Major to be filtered. This value is invalid when isOn = NO.0~65535 && majorMinValue<=majorMaxValue
+/// @param sucBlock Success callback
+/// @param failedBlock Failure callback
++ (void)configMajorFilterStatus:(BOOL)isOn
+                  majorMinValue:(NSInteger)majorMinValue
+                  majorMaxValue:(NSInteger)majorMaxValue
+                       sucBlock:(void (^)(void))sucBlock
+                    failedBlock:(void (^)(NSError *error))failedBlock;
+
+/// Set the current minor filtering conditions.(Firmware Version 3.1.0 or later)
+/// @param isOn Whether to enable minor filtering
+/// @param minorMinValue Minor minimum value to be filtered. This value is invalid when isOn = NO.0~65535 && minorMinValue<=minorMaxValue
+/// @param minorMaxValue The maximum value of Minor to be filtered. This value is invalid when isOn = NO.0~65535 && minorMinValue<=minorMaxValue
+/// @param sucBlock Success callback
+/// @param failedBlock Failure callback
++ (void)configMinorFilterStatus:(BOOL)isOn
+                  minorMinValue:(NSInteger)minorMinValue
+                  minorMaxValue:(NSInteger)minorMaxValue
                        sucBlock:(void (^)(void))sucBlock
                     failedBlock:(void (^)(NSError *error))failedBlock;
 
@@ -312,6 +336,14 @@ typedef NS_ENUM(NSInteger, mk_scannWindowType) {
 /// @param failedBlock Failure callback
 + (void)sendVibrationCommandsToDeviceWithSucBlock:(void (^)(void))sucBlock
                                       failedBlock:(void (^)(NSError *error))failedBlock;
+
+/// Configure the current motor vibration times.
+/// @param numbers 1~10
+/// @param sucBlock Success callback
+/// @param failedBlock Failure callback
++ (void)configNumberOfVibrations:(NSInteger)numbers
+                        sucBlock:(void (^)(void))sucBlock
+                     failedBlock:(void (^)(NSError *error))failedBlock;
 
 @end
 

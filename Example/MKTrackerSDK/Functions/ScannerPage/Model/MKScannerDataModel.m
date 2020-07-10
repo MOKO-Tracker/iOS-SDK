@@ -35,9 +35,17 @@
             [self operationFailedBlockWithMsg:@"Read tracking notification error" block:failedBlock];
             return;
         }
-        if (![self readConditions]) {
-            [self operationFailedBlockWithMsg:@"Read scanning trigger error" block:failedBlock];
-            return;
+        if ([MKDeviceTypeManager shared].supportAdvTrigger) {
+            if (![self readConditions]) {
+                [self operationFailedBlockWithMsg:@"Read scanning trigger error" block:failedBlock];
+                return;
+            }
+        }
+        if ([MKDeviceTypeManager shared].supportNewCommand) {
+            if (![self readNumbersOfVibration]) {
+                [self operationFailedBlockWithMsg:@"Read number of vibrations error" block:failedBlock];
+                return;
+            }
         }
         moko_dispatch_main_safe(^{
             if (sucBlock) {
@@ -59,16 +67,24 @@
             [self operationFailedBlockWithMsg:@"Config tracking note error" block:failedBlock];
             return ;
         }
-        if (![dataModel.conditions[@"isOn"] boolValue]) {
-            //关闭
-            if (![self closeScanningConditions]) {
-                [self operationFailedBlockWithMsg:@"Config scanning conditions error" block:failedBlock];
-                return ;
+        if ([MKDeviceTypeManager shared].supportAdvTrigger) {
+            if (![dataModel.conditions[@"isOn"] boolValue]) {
+                //关闭
+                if (![self closeScanningConditions]) {
+                    [self operationFailedBlockWithMsg:@"Config scanning conditions error" block:failedBlock];
+                    return ;
+                }
+            }else {
+                //打开
+                if (![self configScanningTime:[dataModel.conditions[@"time"] integerValue]]) {
+                    [self operationFailedBlockWithMsg:@"Config scanning conditions error" block:failedBlock];
+                    return ;
+                }
             }
-        }else {
-            //打开
-            if (![self configScanningTime:[dataModel.conditions[@"time"] integerValue]]) {
-                [self operationFailedBlockWithMsg:@"Config scanning conditions error" block:failedBlock];
+        }
+        if ([MKDeviceTypeManager shared].supportNewCommand) {
+            if (![self configNumbersOfVibration]) {
+                [self operationFailedBlockWithMsg:@"Config number of vibrations error" block:failedBlock];
                 return ;
             }
         }
@@ -157,6 +173,31 @@
 - (BOOL)configScanningTime:(NSInteger)time {
     __block BOOL success = NO;
     [MKTrackerInterface configScanningTrigger:time sucBlock:^{
+        success = YES;
+        dispatch_semaphore_signal(self.semaphore);
+    } failedBlock:^(NSError * _Nonnull error) {
+        dispatch_semaphore_signal(self.semaphore);
+    }];
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    return success;
+}
+
+- (BOOL)readNumbersOfVibration {
+    __block BOOL success = NO;
+    [MKTrackerInterface readNumberOfVibrationsWithSucBlock:^(id  _Nonnull returnData) {
+        success = YES;
+        self.vibNubmer = [returnData[@"result"][@"number"] integerValue];
+        dispatch_semaphore_signal(self.semaphore);
+    } failedBlock:^(NSError * _Nonnull error) {
+        dispatch_semaphore_signal(self.semaphore);
+    }];
+    dispatch_semaphore_wait(self.semaphore, DISPATCH_TIME_FOREVER);
+    return success;
+}
+
+- (BOOL)configNumbersOfVibration {
+    __block BOOL success = NO;
+    [MKTrackerInterface configNumberOfVibrations:self.vibNubmer sucBlock:^{
         success = YES;
         dispatch_semaphore_signal(self.semaphore);
     } failedBlock:^(NSError * _Nonnull error) {

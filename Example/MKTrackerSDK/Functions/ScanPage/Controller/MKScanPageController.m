@@ -13,7 +13,6 @@
 #import "MKScanSearchButton.h"
 #import "MKConnectDeviceProgressView.h"
 #import "MKScanSearchView.h"
-#import "MKConfigDateModel.h"
 
 #import "MKAboutController.h"
 
@@ -362,8 +361,8 @@ static NSString *const MKLeftButtonAnimationKey = @"MKLeftButtonAnimationKey";
     [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
         weakSelf.passwordField = nil;
         weakSelf.passwordField = textField;
-        if (ValidStr(weakSelf.localPassword)) {
-            textField.text = weakSelf.localPassword;
+        if (ValidStr([MKDeviceTypeManager shared].password)) {
+            textField.text = [MKDeviceTypeManager shared].password;
         }
         weakSelf.passwordField.placeholder = @"The password is 8 characters.";
         [textField addTarget:self action:@selector(passwordInput) forControlEvents:UIControlEventEditingChanged];
@@ -389,47 +388,15 @@ static NSString *const MKLeftButtonAnimationKey = @"MKLeftButtonAnimationKey";
         return;
     }
     [[MKHudManager share] showHUDWithTitle:@"Connecting..." inView:self.view isPenetration:NO];
-    [[MKContactTrackerCentralManager shared] connectDevice:trackerModel password:password sucBlock:^(CBPeripheral * _Nonnull peripheral) {
-        self.needScan = YES;
-        [self readDeviceType];
-    } failedBlock:^(NSError * _Nonnull error) {
+    [[MKDeviceTypeManager shared] connectTracker:trackerModel password:password completeBlock:^(NSError * _Nonnull error, BOOL supportNewCommand) {
         [[MKHudManager share] hide];
-        [self.view showCentralToast:error.userInfo[@"errorInfo"]];
-        [self connectFailed];
-    }];
-}
-
-- (void)readDeviceType {
-    [MKTrackerInterface readTrackerDeviceTypeWithSucBlock:^(id  _Nonnull returnData) {
-        if (![returnData[@"result"][@"deviceType"] isEqualToString:@"05"]) {
-            //
-            [[MKHudManager share] hide];
-            [self.view showCentralToast:@"Oops! Something went wrong. Please check the device version or contact MOKO."];
+        self.needScan = YES;
+        if (error) {
+            [self.view showCentralToast:error.userInfo[@"errorInfo"]];
             [self connectFailed];
-            [[MKContactTrackerCentralManager shared] disconnect];
             return ;
         }
-        [self performSelector:@selector(configDate) afterDelay:0.5f];
-    } failedBlock:^(NSError * _Nonnull error) {
-        [[MKContactTrackerCentralManager shared] disconnect];
-        [[MKHudManager share] hide];
-        [self.view showCentralToast:error.userInfo[@"errorInfo"]];
-        [self connectFailed];
-        NSLog(@"++++++++++++++++++读取设备类型失败");
-    }];
-}
-
-- (void)configDate {
-    MKConfigDateModel *dateModel = [MKConfigDateModel fetchCurrentTime];
-    [MKTrackerInterface configDeviceTime:dateModel sucBlock:^{
-        [[MKHudManager share] hide];
         [[NSNotificationCenter defaultCenter] postNotificationName:@"MKNeedResetRootControllerToTabBar" object:nil userInfo:@{}];
-    } failedBlock:^(NSError * _Nonnull error) {
-        [[MKContactTrackerCentralManager shared] disconnect];
-        [[MKHudManager share] hide];
-        [self.view showCentralToast:error.userInfo[@"errorInfo"]];
-        [self connectFailed];
-        NSLog(@"++++++++++++++++++配置日期失败");
     }];
 }
 

@@ -19,5 +19,7 @@
 #import "MKBaseTableView.h"
 
 #import "MKContactTrackerSDK.h"
+#import "MKBLEBaseSDK.h"
 
 #import "MKNormalDefines.h"
+#import "MKDeviceTypeManager.h"

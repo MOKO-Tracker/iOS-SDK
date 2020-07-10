@@ -55,6 +55,22 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param character character
 + (BOOL)checkHexCharacter:(NSString *)character;
 
+/**
+ 将一个字节的16进制数据转成8位2进制
+ 
+ @param hex 需要转换的16进制数据
+ @return 转换后的8位2进制数据
+ */
++ (NSString *)binaryByhex:(NSString *)hex;
+
+/// 判断一个string是否全部是ascii码
+/// @param content content
++ (BOOL)asciiString:(NSString *)content;
+
+/// 判断某个字符串是不是uuid
+/// @param uuid [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
++ (BOOL)isUUIDString:(NSString *)uuid;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -264,6 +264,26 @@
                          failureBlock:failedBlock];
 }
 
++ (void)readMajorFilterStateWithSucBlock:(nonnull void (^)(id returnData))sucBlock
+                             failedBlock:(nonnull void (^)(NSError *error))failedBlock {
+    [centralManager addTaskWithTaskID:mk_taskReadMajorFilterStateOperation
+                       characteristic:centralManager.peripheral.custom
+                             resetNum:NO
+                          commandData:@"ea630000"
+                         successBlock:sucBlock
+                         failureBlock:failedBlock];
+}
+
++ (void)readMinorFilterStateWithSucBlock:(nonnull void (^)(id returnData))sucBlock
+                             failedBlock:(nonnull void (^)(NSError *error))failedBlock {
+    [centralManager addTaskWithTaskID:mk_taskReadMinorFilterStateOperation
+                       characteristic:centralManager.peripheral.custom
+                             resetNum:NO
+                          commandData:@"ea640000"
+                         successBlock:sucBlock
+                         failureBlock:failedBlock];
+}
+
 + (void)readRawAdvDataFilterStatusWithSucBlock:(nonnull void (^)(id returnData))sucBlock
                                    failedBlock:(nonnull void (^)(NSError *error))failedBlock {
     [centralManager addTaskWithTaskID:mk_taskReadRawAdvDataFilterStatusOperation
@@ -316,6 +336,16 @@
                        characteristic:centralManager.peripheral.custom
                              resetNum:NO
                           commandData:@"ea600000"
+                         successBlock:sucBlock
+                         failureBlock:failedBlock];
+}
+
++ (void)readNumberOfVibrationsWithSucBlock:(nonnull void (^)(id returnData))sucBlock
+                               failedBlock:(nonnull void (^)(NSError *error))failedBlock {
+    [centralManager addTaskWithTaskID:mk_taskReadNumberOfVibrationsOperation
+                       characteristic:centralManager.peripheral.custom
+                             resetNum:NO
+                          commandData:@"ea620000"
                          successBlock:sucBlock
                          failureBlock:failedBlock];
 }
