@@ -59,7 +59,7 @@
     [pickView showPickViewWithIndex:([self.typeLabel.text integerValue] - 1) block:^(NSInteger currentRow) {
         self.typeLabel.text = dataList[currentRow];
         if ([self.delegate respondsToSelector:@selector(advertiserParamsChanged:index:)]) {
-            [self.delegate advertiserParamsChanged:@(currentRow) index:3];
+            [self.delegate advertiserParamsChanged:dataList[currentRow] index:3];
         }
     }];
 }

@@ -22,6 +22,7 @@
     self.interval = model.interval;
     self.trackingNote = model.trackingNote;
     self.conditions = model.conditions;
+    self.vibNubmer = model.vibNubmer;
 }
 
 - (void)startReadDatasWithSucBlock:(void (^)(void))sucBlock

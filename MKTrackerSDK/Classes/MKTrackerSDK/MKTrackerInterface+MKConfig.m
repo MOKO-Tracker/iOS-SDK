@@ -721,7 +721,14 @@
                              resetNum:NO
                           commandData:commandData
                          successBlock:^(id  _Nonnull returnData) {
-        sucBlock();
+        BOOL success = [returnData[@"result"][@"result"] boolValue];
+        if (!success) {
+            [self operationSetParamsErrorBlock:failedBlock];
+            return ;
+        }
+        if (sucBlock) {
+            sucBlock();
+        }
     }
                          failureBlock:failedBlock];
 }
@@ -827,6 +834,15 @@
     MKBLEBase_main_safe(^{
         if (block) {
             NSError *error = [MKBLEBaseSDKAdopter getErrorWithCode:-999 message:@"Params error"];
+            block(error);
+        }
+    });
+}
+
++ (void)operationSetParamsErrorBlock:(void (^)(NSError *error))block{
+    MKBLEBase_main_safe(^{
+        if (block) {
+            NSError *error = [MKBLEBaseSDKAdopter getErrorWithCode:-10001 message:@"Set parameter error"];
             block(error);
         }
     });

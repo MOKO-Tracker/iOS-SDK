@@ -76,8 +76,14 @@
     if (indexPath.row == 1) {
         return 90.f;
     }
-    if ([MKDeviceTypeManager shared].supportAdvTrigger && indexPath.row == 3) {
-        return ([self.dataModel.conditions[@"isOn"] boolValue] ? 120.f : 60.f);
+    if ([MKDeviceTypeManager shared].supportAdvTrigger) {
+        NSInteger reloadRow = 3;
+        if ([MKDeviceTypeManager shared].supportNewCommand && (self.dataModel.trackingNote == 2 || self.dataModel.trackingNote == 3)) {
+            reloadRow = 4;
+        }
+        if (indexPath.row == reloadRow) {
+            return ([self.dataModel.conditions[@"isOn"] boolValue] ? 120.f : 60.f);
+        }
     }
     return 44.f;
 }
@@ -131,7 +137,11 @@
         }
         self.dataModel.conditions = (NSDictionary *)newValue;
         if (needReload) {
-            [self.tableView reloadRow:3 inSection:0 withRowAnimation:UITableViewRowAnimationNone];
+            NSInteger reloadRow = 3;
+            if ([MKDeviceTypeManager shared].supportNewCommand && (self.dataModel.trackingNote == 2 || self.dataModel.trackingNote == 3)) {
+                reloadRow = 4;
+            }
+            [self.tableView reloadRow:reloadRow inSection:0 withRowAnimation:UITableViewRowAnimationNone];
         }
         return;
     }

@@ -306,7 +306,7 @@ NSString *const mk_communicationDataNum = @"mk_communicationDataNum";
         //读取mac过滤条件
         BOOL isOn = [[content substringWithRange:NSMakeRange(8, 2)] isEqualToString:@"01"];
         NSString *mac = @"";
-        if (isOn && content.length > 12) {
+        if (isOn && content.length >= 12) {
             mac = [content substringWithRange:NSMakeRange(10, len * 2 - 2)];
         }
         returnDic = @{
@@ -318,7 +318,7 @@ NSString *const mk_communicationDataNum = @"mk_communicationDataNum";
         //读取advName过滤条件
         BOOL isOn = [[content substringWithRange:NSMakeRange(8, 2)] isEqualToString:@"01"];
         NSString *advName = @"";
-        if (isOn && content.length > 12) {
+        if (isOn && content.length >= 12) {
             advName = [[NSString alloc] initWithData:[characteristicData subdataWithRange:NSMakeRange(5, len - 1)] encoding:NSUTF8StringEncoding];
         }
         returnDic = @{
