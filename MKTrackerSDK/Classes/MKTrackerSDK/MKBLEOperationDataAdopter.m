@@ -176,7 +176,7 @@ NSString *const mk_communicationDataNum = @"mk_communicationDataNum";
     }else if ([characteristic.UUID isEqual:MKUUID(@"FF0F")]) {
         operationID = mk_taskConfigFactoryDataResetOperation;
     }
-    return [self dataParserGetDataSuccess:@{@"success":@(YES)} operationID:operationID];
+    return [self dataParserGetDataSuccess:@{@"result":@(YES)} operationID:operationID];
 }
 
 #pragma mark -
