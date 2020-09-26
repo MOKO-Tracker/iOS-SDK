@@ -182,7 +182,7 @@
         NSString *curBundleDirectory = [NSString stringWithFormat:@"%@.bundle", curBundleName];
         NSString *normalImgPath = [curBundle pathForResource:@"navigation_back_button_white.png" ofType:nil inDirectory:curBundleDirectory];
         
-        [_leftButton setImage:LOADICON(MKBASEBUNDLUEPATH, @"navigation_back_button_white.png")
+        [_leftButton setImage:[UIImage imageNamed:@"navigation_back_button_white.png"]
                      forState:UIControlStateNormal];
         [_leftButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
         [_leftButton.titleLabel setFont:MKFont(16)];

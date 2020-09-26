@@ -456,12 +456,66 @@ NSString *const mk_communicationDataNum = @"mk_communicationDataNum";
                        @"result":@(YES)
                        };
         operationID = mk_taskConfigScannWindowOperation;
-    }else if ([function isEqualToString:@"f1"] && content.length == 8) {
+    }else if ([function isEqualToString:@"61"] && content.length == 8) {
         //震动
         returnDic = @{
                        @"result":@(YES)
                        };
         operationID = mk_taskSendVibrationCommandsOperation;
+    }else if ([function isEqualToString:@"62"] && content.length == 10) {
+        //读取马达震动次数
+        returnDic = @{
+                       @"number":[MKBLEBaseSDKAdopter getDecimalStringWithHex:content range:NSMakeRange(8, 2)]
+                       };
+        operationID = mk_taskReadNumberOfVibrationsOperation;
+    }else if ([function isEqualToString:@"63"]) {
+        //读取major过滤条件状态
+        BOOL isOn = (content.length == 16);
+        NSString *majorMinValue = @"";
+        NSString *majorMaxValue = @"";
+        if (isOn) {
+            majorMinValue = [MKBLEBaseSDKAdopter getDecimalStringWithHex:content range:NSMakeRange(8, 4)];
+            majorMaxValue = [MKBLEBaseSDKAdopter getDecimalStringWithHex:content range:NSMakeRange(12, 4)];
+        }
+        returnDic = @{
+                       @"isOn":@(isOn),
+                       @"majorMinValue":majorMinValue,
+                       @"majorMaxValue":majorMaxValue,
+                       };
+        operationID = mk_taskReadMajorFilterStateOperation;
+    }else if ([function isEqualToString:@"64"]) {
+        //读取minor过滤条件状态
+        BOOL isOn = (content.length == 16);
+        NSString *minorMinValue = @"";
+        NSString *minorMaxValue = @"";
+        if (isOn) {
+            minorMinValue = [MKBLEBaseSDKAdopter getDecimalStringWithHex:content range:NSMakeRange(8, 4)];
+            minorMaxValue = [MKBLEBaseSDKAdopter getDecimalStringWithHex:content range:NSMakeRange(12, 4)];
+        }
+        returnDic = @{
+                       @"isOn":@(isOn),
+                       @"minorMinValue":minorMinValue,
+                       @"minorMaxValue":minorMaxValue,
+                       };
+        operationID = mk_taskReadMinorFilterStateOperation;
+    }else if ([function isEqualToString:@"72"] && content.length == 8) {
+        //设置马达震动次数
+        returnDic = @{
+                       @"result":@(YES)
+                       };
+        operationID = mk_taskConfigNumberOfVibrationsOperation;
+    }else if ([function isEqualToString:@"73"] && content.length == 8) {
+        //设置Major过滤条件
+        returnDic = @{
+                       @"result":@(YES)
+                       };
+        operationID = mk_taskConfigMajorFilterStateOperation;
+    }else if ([function isEqualToString:@"74"] && content.length == 8) {
+        //设置Minor过滤条件
+        returnDic = @{
+                       @"result":@(YES)
+                       };
+        operationID = mk_taskConfigMinorFilterStateOperation;
     }
     return [self dataParserGetDataSuccess:returnDic operationID:operationID];
 }
